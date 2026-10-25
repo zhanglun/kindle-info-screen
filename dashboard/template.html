@@ -10,10 +10,9 @@
     -webkit-font-smoothing: antialiased; overflow: hidden; }
   .page { width: 100%; height: 100%; padding: 36px 52px 30px; display: flex; flex-direction: column; }
 
-  .dateline { display: flex; justify-content: space-between; font-size: 24px; color: #333;
-    padding-bottom: 8px; }
-  .masthead { text-align: center; font-size: 84px; font-weight: 700; letter-spacing: 26px;
-    text-indent: 26px; line-height: 1.15; }
+  .dateline { display: flex; justify-content: space-between; align-items: baseline; font-size: 26px;
+    color: #333; padding-bottom: 12px; }
+  .dateline .paper { font-size: 32px; font-weight: 700; color: #141414; letter-spacing: 6px; }
   .rule-double { border-top: 4px solid #141414; border-bottom: 1px solid #141414; height: 7px; margin: 10px 0 0; }
 
   .lead { display: flex; padding: 26px 0 22px; border-bottom: 1px solid #141414; }
@@ -61,8 +60,7 @@
 </head>
 <body>
 <div class="page">
-  <div class="dateline"><span id="yearcn"></span><span id="clock"></span></div>
-  <div class="masthead">信息日报</div>
+  <div class="dateline"><span class="paper">信息日报</span><span><span id="yearcn"></span> · <span id="clock"></span></span></div>
   <div class="rule-double"></div>
 
   <div class="lead">
