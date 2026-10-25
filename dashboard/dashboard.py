@@ -71,12 +71,13 @@ def fetch_weather(city):
         days.append({
             "label": "今天" if i == 0 else ("明天" if i == 1 else WEEKDAY[date.weekday()]),
             "code": WMO.get(daily["weathercode"][i], "未知"),
+            "wc": daily["weathercode"][i],
             "hi": round(daily["temperature_2m_max"][i]),
             "lo": round(daily["temperature_2m_min"][i]),
         })
     return {"city": geo["name"], "temp": round(cur["temperature"]),
-            "code": WMO.get(cur["weathercode"], "未知"), "wind": round(cur["windspeed"]),
-            "days": days}
+            "code": WMO.get(cur["weathercode"], "未知"), "wc": cur["weathercode"],
+            "wind": round(cur["windspeed"]), "days": days}
 
 # ---------- RSS ----------
 def fetch_rss(sources, limit):
@@ -89,11 +90,11 @@ def fetch_rss(sources, limit):
             nodes = channel.findall(".//item") if channel is not None else []
             if not nodes:
                 nodes = root.findall(".//{*}entry")
-            for n in nodes[:max(3, limit // max(1, len(sources)))]:
+            for n in nodes[:max(1, limit // max(1, len(sources)))]:
                 t = n.findtext("title") or n.findtext("{*}title") or ""
                 t = re.sub(r"<!\[CDATA\[|\]\]>", "", t).strip()
                 if t:
-                    items.append({"src": src["name"], "title": t[:40]})
+                    items.append({"src": src["name"], "title": t[:32]})
         except Exception as e:
             items.append({"src": src["name"], "title": "(源暂时不可用: %s)" % type(e).__name__})
     return items[:limit]

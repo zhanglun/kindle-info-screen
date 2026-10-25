@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  /* 大字报式极简 —— 瑞士网格 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #ffffff; color: #101010;
+    font-family: "Microsoft YaHei", sans-serif;
+    font-variant-numeric: tabular-nums; overflow: hidden; }
+  .num { font-family: "Bahnschrift", "Microsoft YaHei", sans-serif; }
+  .page { width: 100%; height: 100%; padding: 64px 72px 44px; display: flex; flex-direction: column; }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .top .l .d { font-size: 150px; font-weight: 700; line-height: 0.94; letter-spacing: -3px; }
+  .top .l .m { font-size: 30px; font-weight: 400; color: #3c3c3c; margin-top: 18px; }
+  .top .r { text-align: right; }
+  .top .r .t { font-size: 150px; font-weight: 700; line-height: 0.94; letter-spacing: -3px; }
+  .top .r .t sup { font-size: 64px; font-weight: 400; }
+  .top .r .m { font-size: 30px; color: #3c3c3c; margin-top: 18px; }
+
+  .rule { border-top: 2px solid #101010; }
+  .hair { border-top: 1px solid #101010; }
+
+  .count { padding: 40px 0 34px; }
+  .crow { display: flex; align-items: baseline; padding: 12px 0; }
+  .crow .n { font-size: 34px; font-weight: 700; width: 220px; }
+  .crow .dt { font-size: 26px; color: #555; width: 200px; }
+  .crow .fill { flex: 1; }
+  .crow .v { font-size: 68px; font-weight: 700; letter-spacing: -1px; }
+  .crow .v small { font-size: 26px; font-weight: 400; color: #555; margin-left: 8px; }
+
+  .fc { display: flex; padding: 30px 0 34px; gap: 0; }
+  .fd { flex: 1; }
+  .fd .l { font-size: 25px; color: #555; }
+  .fd .i { height: 52px; display: flex; align-items: center; margin: 12px 0; }
+  .fd .i svg { width: 44px; height: 44px; }
+  .fd .c { font-size: 27px; font-weight: 700; }
+  .fd .t { font-size: 27px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .fd .t small { color: #777; }
+
+  .cols { display: flex; gap: 64px; flex: 1; min-height: 0; margin-top: 36px; overflow: hidden; }
+  .col { flex: 1; min-width: 0; }
+  .sec { font-size: 27px; font-weight: 700; margin-bottom: 20px; }
+  .todo li, .news li { list-style: none; }
+  .todo li { display: flex; gap: 16px; align-items: flex-start; padding: 13px 0;
+    font-size: 30px; line-height: 1.45; border-bottom: 1px solid #d8d8d8; }
+  .todo .box { flex: none; width: 22px; height: 22px; border: 2.5px solid #101010; margin-top: 9px; }
+  .news li { padding: 12px 0; border-bottom: 1px solid #d8d8d8; font-size: 27px; line-height: 1.42; }
+  .news .src { font-size: 22px; color: #777; display: block; margin-bottom: 3px; }
+  .foot { margin-top: auto; padding-top: 18px; display: flex; justify-content: space-between;
+    font-size: 22px; color: #3c3c3c; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div class="l">
+      <div class="d num" id="date">--</div>
+      <div class="m" id="meta"></div>
+    </div>
+    <div class="r">
+      <div class="t num"><span id="temp">--</span><sup>°</sup></div>
+      <div class="m" id="cond"></div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin-top:44px"></div>
+  <div class="count" id="count"></div>
+  <div class="hair"></div>
+
+  <div class="fc" id="forecast"></div>
+  <div class="hair"></div>
+
+  <div class="cols">
+    <div class="col">
+      <div class="sec">待办</div>
+      <ul class="todo" id="todo"></ul>
+    </div>
+    <div class="col">
+      <div class="sec">资讯</div>
+      <ul class="news" id="rss"></ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Kindle Info Screen</span>
+    <span id="footright"></span>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+function icon(code){
+  const c = 'fill="none" stroke="#101010" stroke-width="1.7" stroke-linecap="round"';
+  if (code<=1) return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" ${c}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" ${c}/></svg>`;
+  if (code<=3) return `<svg viewBox="0 0 24 24"><path d="M6 18a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 9.5 3.75 3.75 0 0 1 17 18H6z" ${c}/></svg>`;
+  if (code<=48) return `<svg viewBox="0 0 24 24"><path d="M6 14a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 5.5 3.75 3.75 0 0 1 17 14H6z" ${c}/><path d="M5 18h14M7 21h10" ${c}/></svg>`;
+  if (code<=67 || (code>=80 && code<=82)) return `<svg viewBox="0 0 24 24"><path d="M6 13a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 4.5 3.75 3.75 0 0 1 17 13H6z" ${c}/><path d="M8 16l-1.5 4M13 16l-1.5 4M18 16l-1.5 4" ${c}/></svg>`;
+  if (code<=86) return `<svg viewBox="0 0 24 24"><path d="M6 13a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 4.5 3.75 3.75 0 0 1 17 13H6z" ${c}/><path d="M8 17.5v.01M12 20v.01M16 17.5v.01" stroke="#101010" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><path d="M6 12a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 3.5 3.75 3.75 0 0 1 17 12H6z" ${c}/><path d="M13 13l-3 5h3l-2 5 5.5-7h-3l2-3z" fill="#101010"/></svg>`;
+}
+
+const now = new Date();
+document.getElementById("date").textContent =
+  String(now.getMonth()+1).padStart(2,"0") + "." + String(now.getDate()).padStart(2,"0");
+document.getElementById("meta").textContent = DATA.weekday + " · " + DATA.time;
+
+const w = DATA.weather;
+if (w) {
+  document.getElementById("temp").textContent = w.temp;
+  document.getElementById("cond").textContent = w.code + " · " + w.city + " · 风速 " + w.wind;
+  document.getElementById("forecast").innerHTML = w.days.map(d =>
+    '<div class="fd"><div class="l">' + d.label + '</div><div class="i">' + icon(d.wc) + '</div>' +
+    '<div class="c">' + d.code + '</div><div class="t">' + d.hi + '° <small>' + d.lo + '°</small></div></div>').join("");
+} else {
+  document.getElementById("cond").textContent = DATA.weather_error || "暂无天气数据";
+}
+
+document.getElementById("count").innerHTML = DATA.countdowns.map(c =>
+  '<div class="crow"><span class="n">距 ' + c.name + '</span><span class="dt num">' + c.date +
+  '</span><span class="fill"></span><span class="v num">' + c.days + '<small>天</small></span></div>').join("");
+
+const todo = DATA.todo;
+document.getElementById("todo").innerHTML = todo.length
+  ? todo.map(t => '<li><span class="box"></span><span>' + t + '</span></li>').join("")
+  : '<li><span class="box"></span><span>今日无事</span></li>';
+
+document.getElementById("rss").innerHTML = DATA.rss.length
+  ? DATA.rss.map(r => '<li><span class="src">' + r.src + '</span>' + r.title + '</li>').join("")
+  : '<li>暂无资讯</li>';
+
+document.getElementById("footright").textContent = "更新于 " + DATA.time;
+</script>
+</body>
+</html>
