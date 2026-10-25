@@ -4,7 +4,7 @@
 用法: python dashboard.py once   (渲染一次)
       python dashboard.py serve  (循环渲染 + 提供图片下载服务)
 """
-import json, ssl, sys, time, re, shutil, subprocess, threading, datetime as dt
+import json, ssl, sys, time, re, math, shutil, subprocess, threading, datetime as dt
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -60,7 +60,7 @@ def fetch_weather(city):
     geo = geocode(city)
     url = (f"https://api.open-meteo.com/v1/forecast?latitude={geo['lat']}&longitude={geo['lon']}"
            "&current_weather=true"
-           "&daily=weathercode,temperature_2m_max,temperature_2m_min"
+           "&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset"
            "&forecast_days=5&timezone=auto")
     d = json.loads(http_get(url))
     cur = d["current_weather"]
@@ -75,9 +75,56 @@ def fetch_weather(city):
             "hi": round(daily["temperature_2m_max"][i]),
             "lo": round(daily["temperature_2m_min"][i]),
         })
-    return {"city": geo["name"], "temp": round(cur["temperature"]),
-            "code": WMO.get(cur["weathercode"], "未知"), "wc": cur["weathercode"],
-            "wind": round(cur["windspeed"]), "days": days}
+    w = {"city": geo["name"], "temp": round(cur["temperature"]),
+         "code": WMO.get(cur["weathercode"], "未知"), "wc": cur["weathercode"],
+         "wind": round(cur["windspeed"]), "days": days,
+         "sunrise": daily["sunrise"][0][11:16], "sunset": daily["sunset"][0][11:16]}
+    # 空气质量(同一数据源,免费无 key)
+    try:
+        aqi_url = (f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={geo['lat']}"
+                   f"&longitude={geo['lon']}&current=pm2_5,us_aqi&timezone=auto")
+        a = json.loads(http_get(aqi_url)).get("current", {})
+        aqi, pm = a.get("us_aqi"), a.get("pm2_5")
+        if aqi is not None:
+            grade = ("优" if aqi <= 50 else "良" if aqi <= 100 else "轻度污染" if aqi <= 150
+                     else "中度污染" if aqi <= 200 else "重度污染" if aqi <= 300 else "严重污染")
+            w["aqi"] = round(aqi)
+            w["aqi_desc"] = grade
+            w["pm25"] = round(pm) if pm is not None else None
+    except Exception:
+        pass
+    return w
+
+def fetch_yiyan():
+    d = json.loads(http_get("https://v1.hitokoto.cn/?c=d&c=i&c=k", timeout=15))
+    return {"text": d.get("hitokoto", ""), "from": d.get("from", "") or "佚名",
+            "who": d.get("from_who", "") or ""}
+
+def fetch_lunar_moon():
+    lunar_str = jieqi = None
+    try:
+        from lunar_python import Solar
+        solar = Solar.fromDate(dt.datetime.now())
+        lunar = solar.getLunar()
+        lunar_str = lunar.toString().split("年")[-1]
+        jq = lunar.getPrevJieQi()
+        js = jq.getSolar()
+        jq_days = (dt.date.today() - dt.date(js.getYear(), js.getMonth(), js.getDay())).days
+        if jq_days == 0:
+            jieqi = jq.getName()
+        elif jq_days < 15:
+            jieqi = jq.getName() + "后" + str(jq_days) + "天"
+        else:
+            jieqi = None
+    except Exception:
+        pass
+    # 月相:朔望月周期本地推算
+    epoch = dt.date(2000, 1, 6)
+    age = (dt.date.today() - epoch).days % 29.530588
+    phases = ["新月", "娥眉月", "上弦月", "盈凸月", "满月", "亏凸月", "下弦月", "残月"]
+    name = phases[int((age / 29.530588) * 8 + 0.5) % 8]
+    illum = round((1 - math.cos(2 * math.pi * age / 29.530588)) / 2 * 100)
+    return {"lunar": lunar_str, "jieqi": jieqi, "moon": {"name": name, "illum": illum}}
 
 # ---------- RSS ----------
 def fetch_rss(sources, limit):
@@ -140,6 +187,14 @@ def build_data():
         data["weather_error"] = "天气获取失败(%s)" % type(e).__name__
     try:
         data["rss"] = fetch_rss(cfg.get("rss_sources", []), cfg.get("rss_count", 6))
+    except Exception:
+        pass
+    try:
+        data["yiyan"] = fetch_yiyan()
+    except Exception:
+        pass
+    try:
+        data.update(fetch_lunar_moon())
     except Exception:
         pass
     return cfg, data

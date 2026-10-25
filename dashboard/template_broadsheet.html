@@ -10,10 +10,14 @@
     -webkit-font-smoothing: antialiased; overflow: hidden; }
   .page { width: 100%; height: 100%; padding: 36px 52px 30px; display: flex; flex-direction: column; }
 
-  .dateline { display: flex; justify-content: space-between; align-items: baseline; font-size: 26px;
-    color: #333; padding-bottom: 12px; }
+  .dateline { display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 26px; color: #333; padding-bottom: 10px; }
   .dateline .paper { font-size: 32px; font-weight: 700; color: #141414; letter-spacing: 6px; }
-  .rule-double { border-top: 4px solid #141414; border-bottom: 1px solid #141414; height: 7px; margin: 10px 0 0; }
+  .dateline2 { display: flex; justify-content: space-between; align-items: center;
+    font-size: 24px; color: #333; padding-bottom: 12px; }
+  .dateline2 .sky { display: flex; align-items: center; gap: 8px; }
+  .dateline2 .sky svg { width: 26px; height: 26px; transform: translateY(4px); }
+  .rule-double { border-top: 4px solid #141414; border-bottom: 1px solid #141414; height: 7px; }
 
   .lead { display: flex; padding: 26px 0 22px; border-bottom: 1px solid #141414; }
   .lead-main { flex: 1.35; }
@@ -21,7 +25,9 @@
     letter-spacing: -2px; }
   .lead-main .temp sup { font-size: 56px; font-weight: 400; }
   .lead-main .cond { font-size: 38px; font-weight: 700; margin-top: 12px; }
-  .lead-main .wind { font-size: 25px; color: #444; margin-top: 6px; }
+  .lead-main .wind { font-size: 25px; color: #444; margin-top: 10px; }
+  .lead-main .aqi { font-size: 25px; color: #444; margin-top: 6px; }
+  .lead-main .sun { font-size: 25px; color: #444; margin-top: 6px; }
   .lead-vline { width: 1px; background: #141414; margin: 4px 34px; }
   .lead-side { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
   .frow { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid #c9c9c2; }
@@ -46,21 +52,29 @@
     border-bottom: 3px solid #141414; padding-bottom: 8px; margin-bottom: 4px; }
   .colhead .t { font-size: 36px; font-weight: 700; letter-spacing: 8px; }
   .colhead .s { font-size: 21px; color: #444; }
-  .todo li, .news li { list-style: none; }
-  .todo li { display: flex; align-items: flex-start; gap: 14px; padding: 15px 2px;
+  .todo li { list-style: none; display: flex; align-items: flex-start; gap: 14px; padding: 15px 2px;
     border-bottom: 1px solid #c9c9c2; font-size: 31px; line-height: 1.4; }
   .todo .box { flex: none; width: 24px; height: 24px; border: 3px solid #141414; margin-top: 8px; }
-  .news li { padding: 13px 2px; border-bottom: 1px solid #c9c9c2; }
-  .news .src { display: inline-block; background: #141414; color: #fdfdfa; font-family: "Microsoft YaHei";
-    font-size: 19px; padding: 2px 10px; margin-right: 10px; vertical-align: 4px; }
-  .news .tt { font-size: 29px; line-height: 1.42; }
+  .quote { padding: 34px 6px 0; }
+  .quote .qtext { font-size: 40px; font-weight: 700; line-height: 2.0; text-align: justify; }
+  .quote .qmark { font-size: 58px; font-weight: 900; line-height: 0; }
+  .quote .qfrom { text-align: right; margin-top: 34px; font-size: 27px; color: #333; }
+  .quote .qnote { margin-top: 40px; font-size: 23px; color: #555; line-height: 1.7;
+    border-top: 1px solid #c9c9c2; padding-top: 16px; }
   .folio { text-align: center; font-size: 21px; color: #444; padding-top: 14px;
     border-top: 1px solid #141414; margin-top: 16px; }
 </style>
 </head>
 <body>
 <div class="page">
-  <div class="dateline"><span class="paper">信息日报</span><span><span id="yearcn"></span> · <span id="clock"></span></span></div>
+  <div class="dateline">
+    <span class="paper">信息日报</span>
+    <span id="clock"></span>
+  </div>
+  <div class="dateline2">
+    <span id="datecn"></span>
+    <span class="sky" id="sky"></span>
+  </div>
   <div class="rule-double"></div>
 
   <div class="lead">
@@ -68,6 +82,8 @@
       <div class="temp"><span id="temp">--</span><sup>°C</sup></div>
       <div class="cond" id="cond">——</div>
       <div class="wind" id="wind"></div>
+      <div class="aqi" id="aqi"></div>
+      <div class="sun" id="sun"></div>
     </div>
     <div class="lead-vline"></div>
     <div class="lead-side" id="forecast"></div>
@@ -81,8 +97,12 @@
       <ul class="todo" id="todo"></ul>
     </div>
     <div class="col">
-      <div class="colhead"><span class="t">新闻摘要</span><span class="s">摘录</span></div>
-      <ul class="news" id="rss"></ul>
+      <div class="colhead"><span class="t">每日一言</span><span class="s">诗与文</span></div>
+      <div class="quote">
+        <span class="qmark">「</span><span class="qtext" id="qtext">……</span><span class="qmark">」</span>
+        <div class="qfrom" id="qfrom"></div>
+        <div class="qnote">一言摘自 hitokoto,每日更换。愿这句话陪你读完今天的报纸。</div>
+      </div>
     </div>
   </div>
 
@@ -90,8 +110,9 @@
 </div>
 <script>
 const DATA = /*__DATA__*/null;
+const w = DATA.weather;
 const WMO = {0:"晴",1:"晴间多云",2:"多云",3:"阴",45:"雾",48:"雾凇",51:"毛毛雨",53:"毛毛雨",55:"毛毛雨",56:"冻雨",57:"冻雨",61:"小雨",63:"中雨",65:"大雨",66:"冻雨",67:"冻雨",71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"阵雨",81:"阵雨",82:"强阵雨",85:"阵雪",86:"阵雪",95:"雷暴",96:"雷暴冰雹",99:"雷暴冰雹"};
-function icon(code){ // 极简线条天气图标
+function icon(code){
   const c = 'fill="none" stroke="#141414" stroke-width="1.8" stroke-linecap="round"';
   if (code<=1) return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" ${c}/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" ${c}/></svg>`;
   if (code<=3) return `<svg viewBox="0 0 24 24"><path d="M6 18a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 9.5 3.75 3.75 0 0 1 17 18H6z" ${c}/></svg>`;
@@ -100,16 +121,39 @@ function icon(code){ // 极简线条天气图标
   if (code<=86) return `<svg viewBox="0 0 24 24"><path d="M6 13a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 4.5 3.75 3.75 0 0 1 17 13H6z" ${c}/><path d="M8 17.5v.01M12 20v.01M16 17.5v.01" stroke="#141414" stroke-width="2.6" stroke-linecap="round"/></svg>`;
   return `<svg viewBox="0 0 24 24"><path d="M6 12a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.4 3.5 3.75 3.75 0 0 1 17 12H6z" ${c}/><path d="M13 13l-3 5h3l-2 5 5.5-7h-3l2-3z" fill="#141414"/></svg>`;
 }
+function moonSvg(name){
+  const o = 'fill="none" stroke="#141414" stroke-width="1.8"', f = 'fill="#141414"';
+  const p = {
+    "新月": `<circle cx="12" cy="12" r="9" ${o}/>`,
+    "娥眉月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" ${f}/>`,
+    "上弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 Z" ${f}/>`,
+    "盈凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" ${f}/>`,
+    "满月": `<circle cx="12" cy="12" r="9" ${o}/><circle cx="12" cy="12" r="9" ${f}/>`,
+    "亏凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" ${f}/>`,
+    "下弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 Z" ${f}/>`,
+    "残月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ${f}/>`
+  };
+  return `<svg viewBox="0 0 24 24">${p[name] || p["满月"]}</svg>`;
+}
 
-const CN = "〇一二三四五六七八九";
-document.getElementById("yearcn").textContent = DATA.year + " 年 " + DATA.date + " · " + DATA.weekday;
 document.getElementById("clock").textContent = "更新于 " + DATA.time;
+const cn = [];
+cn.push(DATA.date + " " + DATA.weekday);
+if (DATA.lunar) cn.push("农历 " + DATA.lunar);
+if (DATA.jieqi) cn.push(DATA.jieqi);
+document.getElementById("datecn").textContent = cn.join(" · ");
+const sky = [];
+if (DATA.moon) sky.push(moonSvg(DATA.moon.name) + " " + DATA.moon.name);
+document.getElementById("sky").innerHTML = sky.join(" · ");
 
-const w = DATA.weather;
 if (w) {
   document.getElementById("temp").textContent = w.temp;
   document.getElementById("cond").textContent = w.code + " · " + w.city;
   document.getElementById("wind").textContent = "风速 " + w.wind + " km/h";
+  document.getElementById("sun").textContent = "日出 " + w.sunrise + " · 日落 " + w.sunset;
+  document.getElementById("aqi").textContent = w.aqi != null
+    ? "PM2.5 " + w.pm25 + " · 空气质量 " + w.aqi + "(" + w.aqi_desc + ")"
+    : "";
   document.getElementById("forecast").innerHTML = w.days.map(d =>
     '<div class="frow"><span class="d">' + d.label + '</span><span class="ic">' + icon(d.wc) + '</span>' +
     '<span class="c">' + d.code + '</span><span class="t">' + d.hi + '° <small>/ ' + d.lo + '°</small></span></div>').join("");
@@ -126,9 +170,14 @@ document.getElementById("todo").innerHTML = todo.length
   ? todo.map(t => '<li><span class="box"></span><span>' + t + '</span></li>').join("")
   : '<li><span class="box"></span><span>今日无事,静心阅读</span></li>';
 
-document.getElementById("rss").innerHTML = DATA.rss.length
-  ? DATA.rss.map(r => '<li><span class="src">' + r.src + '</span><span class="tt">' + r.title + '</span></li>').join("")
-  : '<li><span class="tt">暂无资讯</span></li>';
+const y = DATA.yiyan;
+if (y && y.text) {
+  document.getElementById("qtext").textContent = y.text;
+  document.getElementById("qfrom").textContent =
+    "—— " + (y.who ? y.who + (y.from ? " 《" + y.from + "》" : "") : y.from);
+} else {
+  document.getElementById("qtext").textContent = "今天没有摘到一言,明天再来。";
+}
 </script>
 </body>
 </html>
