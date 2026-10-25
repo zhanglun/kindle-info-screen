@@ -4,7 +4,7 @@
 用法: python dashboard.py once   (渲染一次)
       python dashboard.py serve  (循环渲染 + 提供图片下载服务)
 """
-import json, ssl, sys, time, re, math, shutil, subprocess, threading, datetime as dt
+import json, ssl, socket, sys, time, re, math, shutil, subprocess, threading, datetime as dt
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -232,9 +232,21 @@ def render_once():
         pass
     print("rendered:", png, png.stat().st_size, "bytes")
 
+def lan_ip():
+    """取局域网源 IP(UDP connect 不发包), 给 Kindle 拉取地址用"""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("223.5.5.5", 80))
+        return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
 def serve():
-    port = json.loads(CONFIG.read_text("utf-8")).get("port", 8787)
-    interval = json.loads(CONFIG.read_text("utf-8")).get("interval_min", 10)
+    cfg = json.loads(CONFIG.read_text("utf-8"))
+    port = cfg.get("port", 8787)
+    interval = cfg.get("interval_min", 10)
 
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *a, **kw):
@@ -245,6 +257,9 @@ def serve():
     httpd = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     print(f"服务已启动: http://0.0.0.0:{port}/dashboard.png  每 {interval} 分钟刷新")
+    print(f"Kindle 拉取地址: http://{lan_ip()}:{port}/dashboard.png")
+    print("(填入 Kindle 端 extensions/dashboard-updater/bin/dashboard_url.conf,"
+          " 如拉取失败先检查 Windows 防火墙是否放行 Python)")
     while True:
         try:
             render_once()
