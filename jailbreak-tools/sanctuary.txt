@@ -1,0 +1,779 @@
+!doctype html>
+html lang=en>
+head>
+meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+link rel="shortcut icon" type=image/x-icon href=https://kindlemodding.org/favicon.ico sizes="512x512 256x256 192x192 128x128 96x96 64x64 48x48 32x32 16x16">
+link rel=icon type=image/png sizes=192x192 href=https://kindlemodding.org/logo-192.png>
+link rel=icon type=image/png sizes=48x48 href=https://kindlemodding.org/logo-48.png>
+link rel=apple-touch-icon href=https://kindlemodding.org/logo.png type=image/x-icon sizes=1024x1024>
+link rel=apple-touch-icon href=https://kindlemodding.org/logo-192.png type=image/x-icon sizes=192x192>
+meta name=twitter:site content="Kindle Modding Wiki">
+meta property="og:title" content="KindleModding - Sanctuary">
+meta name=twitter:title content="KindleModding - Sanctuary">
+meta property="og:type" content="website">
+meta property="og:url" content="https://kindlemodding.org/jailbreaking/Sanctuary/">
+meta name=description content="Sanctuary
+    I know not all that may be coming, but be it what it will, I&rsquo;ll go to it laughing.
+- Herman Melville
+Sanctuary is a jailbreak released on 30/06/2026 by Ava, Alysa (Sky), sparklerfish.
+You can read the writeup here.
+Prerequisites
+A PC, Kindle.
+A supported model and firmware, as you have been led here by the Jailbreaking Wizard.
+You have read this overview and filled the device, if applicable
+A Wi-Fi connection.
+    If you face any difficulty in following these guides, please navigate to the troubleshooting section, and/or make a ticket in the KindleModding Discord support forums.
+">
+meta property="og:description" content="Sanctuary
+    I know not all that may be coming, but be it what it will, I&rsquo;ll go to it laughing.
+- Herman Melville
+Sanctuary is a jailbreak released on 30/06/2026 by Ava, Alysa (Sky), sparklerfish.
+You can read the writeup here.
+Prerequisites
+A PC, Kindle.
+A supported model and firmware, as you have been led here by the Jailbreaking Wizard.
+You have read this overview and filled the device, if applicable
+A Wi-Fi connection.
+    If you face any difficulty in following these guides, please navigate to the troubleshooting section, and/or make a ticket in the KindleModding Discord support forums.
+">
+meta name=twitter:description content="Sanctuary
+    I know not all that may be coming, but be it what it will, I&rsquo;ll go to it laughing.
+- Herman Melville
+Sanctuary is a jailbreak released on 30/06/2026 by Ava, Alysa (Sky), sparklerfish.
+You can read the writeup here.
+Prerequisites
+A PC, Kindle.
+A supported model and firmware, as you have been led here by the Jailbreaking Wizard.
+You have read this overview and filled the device, if applicable
+A Wi-Fi connection.
+    If you face any difficulty in following these guides, please navigate to the troubleshooting section, and/or make a ticket in the KindleModding Discord support forums.
+">
+meta property="og:image" content="https://kindlemodding.org/logo.png">
+meta name=twitter:card content="summary">
+meta name=theme-color content="#5865F2">
+link rel=preconnect href=https://fonts.googleapis.com>
+link rel=preconnect href=https://fonts.gstatic.com crossorigin>
+link rel=stylesheet href=/css/main.6e9c02021cd28cffa8ef6bc039d505aa62d16155dd25cbb029cdd18121fa730a.css integrity="sha256-bpwCAhzSjP+o72vAOdUFqmLRYVXdJcuwKc3RgSH6cwo=" crossorigin=anonymous>
+script>const baseUrl="https://kindlemodding.org/"
+/script>
+script src=https://kindlemodding.org//assets/js/global.js>
+/script>
+script src=https://kindlemodding.org//assets/js/fluent_guide.js>
+/script>
+script src=https://kindlemodding.org//assets/js/search.js>
+/script>
+script>(function(e,t,n,s,o){e[s]=e[s]||[],e[s].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var a=t.getElementsByTagName(n)[0],i=t.createElement(n),r=s!="dataLayer"?"&l="+s:"";i.async=!0,i.src="https://www.googletagmanager.com/gtm.js?id="+o+r,a.parentNode.insertBefore(i,a)})(window,document,"script","dataLayer","GTM-MT46Q863")
+/script>
+noscript>
+iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MT46Q863" height=0 width=0 style=display:none;visibility:hidden>
+/iframe>
+/noscript>
+script async src="https://www.googletagmanager.com/gtag/js?id=G-FBQYY5S667">
+/script>
+script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FBQYY5S667")
+/script>
+script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4468899728405672" crossorigin=anonymous>
+/script>
+script>function refreshTheme(){switch(document.documentElement.classList.remove("dark-theme"),document.documentElement.classList.remove("light-theme"),localStorage.getItem("theme")){case"light":document.documentElement.classList.add("light-theme");break;case"dark":document.documentElement.classList.add("dark-theme");break}}const themes=["light","dark"];themes.includes(localStorage.getItem("theme"))||localStorage.setItem("theme","dark"),refreshTheme()
+/script>
+title>KindleModding - Sanctuary
+/title>
+/head>
+body>
+div class=pageWrapper>
+div class=navbar role=navigation>
+div>
+h1 style=color:var(--text-colour)!important>
+a href=https://kindlemodding.org/ style="text-decoration:none;color:unset!important;background:0 0!important;padding:0!important">Kindle Modding Wiki
+/a>
+/h1>
+/div>
+div class=search-container>
+input type=text id=search-input placeholder=Search...>
+div id=search-results>
+/div>
+/div>
+a href=https://kindlemodding.org/jailbreak-wizard.html>Find my Jailbreak
+/a>
+details open>
+summary>
+a href=https://kindlemodding.org/jailbreaking/index.html>Jailbreaking Your Kindle
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/prevent-auto-update/>Prevent Automatic Updates
+/a>
+a href=https://kindlemodding.org/jailbreaking/Vera/>Véra
+/a>
+a href=https://kindlemodding.org/jailbreaking/SpiderCat/>SpiderCat
+/a>
+a href=https://kindlemodding.org/jailbreaking/SpringBreak/>SpringBreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/AdBreak/>AdBreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/Nosebleed/>Nosebleed
+/a>
+a class=active href=https://kindlemodding.org/jailbreaking/Sanctuary/>Sanctuary
+/a>
+a href=https://kindlemodding.org/jailbreaking/WinterBreak/>WinterBreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/WinterBreak2/>WinterBreak2
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/jailbreaking/Legacy/index.html>Legacy
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/Legacy/LanguageBreak.html>LanguageBreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/K2DXDXGK3-Jailbreak/>NiLuJe K2/DX/DXG/K3 Jailbreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/K4-Jailbreak/>NiLuJe K4 Jailbreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/K5-Jailbreak/>NiLuJe K5 Jailbreak
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/WatchThis/>WatchThis
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/index.html>Popcorn
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/KT2.html>KT2
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/KT3.html>KT3
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/KV.html>KV
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/PW2.html>PW2
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/Popcorn/PW3.html>PW3
+/a>
+/div>
+/details>
+a href=https://kindlemodding.org/jailbreaking/Legacy/KindleBreak/>KindleBreak
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/jailbreaking/Legacy/backing-up/index.html>Backing Up
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/Legacy/backing-up/backing-up.html>Backing Up Your Kindle
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/backing-up/restoring.html>Restoring Your Kindle
+/a>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/jailbreaking/Legacy/post-jailbreak/index.html>Post Jailbreak
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/Legacy/post-jailbreak/setting-up-a-hotfix/>Setting Up A Hotfix
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/post-jailbreak/installing-kual-mrpi/>Installing KUAL & MRPI
+/a>
+a href=https://kindlemodding.org/jailbreaking/Legacy/post-jailbreak/disable-ota.html>Disabling OTA Updates
+/a>
+/div>
+/details>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/jailbreaking/whats-next/index.html>What's Next?
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/jailbreaking/whats-next/installing-homebrew.html>Installing Homebrew
+/a>
+a href=https://kindlemodding.org/jailbreaking/whats-next/getting-koreader/>Getting KOReader
+/a>
+/div>
+/details>
+a href=https://kindlemodding.org/jailbreaking/jailbreak-faq.html>Kindle Jailbreak FAQ
+/a>
+a href=https://kindlemodding.org/jailbreaking/recovering-from-a-reset.html>Recovering From a Reset
+/a>
+a href=https://kindlemodding.org/jailbreaking/bypassing-oobe.html>Bypassing OOBE
+/a>
+a href=https://kindlemodding.org/jailbreaking/unjailbreaking.html>Unjailbreaking Your Kindle
+/a>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/firmware-and-flashing/index.html>Firmware and Flashing
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/firmware-and-flashing/downloading-updates.html>Manually Downloading Firmware Update Files
+/a>
+a href=https://kindlemodding.org/firmware-and-flashing/downgrading/>Downgrading Your Kindle
+/a>
+a href=https://kindlemodding.org/firmware-and-flashing/kv-flash-new-firmware.html>Forcing KV to run 5.14+
+/a>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-dev/index.html>Kindle Development
+/a>
+/summary>
+div>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-dev/kpm/index.html>KPM
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/kindle-dev/kpm/creating-a-package.html>Creating a Package
+/a>
+a href=https://kindlemodding.org/kindle-dev/kpm/creating-a-repository.html>Creating a Repository
+/a>
+/div>
+/details>
+a href=https://kindlemodding.org/kindle-dev/scriptlets.html>Scriptlets
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-dev/gtk-tutorial/index.html>GTK Tutorial
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/kindle-dev/gtk-tutorial/prerequisites.html>Prerequisites
+/a>
+a href=https://kindlemodding.org/kindle-dev/gtk-tutorial/setting-up.html>Setting Up The Project
+/a>
+a href=https://kindlemodding.org/kindle-dev/gtk-tutorial/kindle-considerations.html>Kindle Considerations
+/a>
+/div>
+/details>
+a href=https://kindlemodding.org/kindle-dev/kindle-sdk.html>Kindle SDK
+/a>
+a href=https://kindlemodding.org/kindle-dev/awesome-window-manager/>Awesome Window Manager
+/a>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/wafs-and-mesquite/index.html>WAFs & Mesquite
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/wafs-and-mesquite/understanding-config-xml.html>Understanding config.xml
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/index.html>The Kindle Object
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-chrome.html>kindle.chrome
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-dconfig.html>kindle.dconfig
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-dev.html>kindle.dev
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-device.html>kindle.device
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-gestures.html>kindle.gestures
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-messaging.html>kindle.messaging
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-net.html>kindle.net
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/kindle-todo.html>kindle.todo
+/a>
+a href=https://kindlemodding.org/wafs-and-mesquite/the-kindle-object/enums.html>Enums
+/a>
+/div>
+/details>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-hacking/index.html>Kindle Hacking
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/kindle-hacking/models-table.html>Models Table
+/a>
+a href=https://kindlemodding.org/kindle-hacking/appreg.html>Appreg.db
+/a>
+a href=https://kindlemodding.org/kindle-hacking/debug-commands.html>Debug Commands
+/a>
+a href=https://kindlemodding.org/kindle-hacking/hotfix.html>Hotfix
+/a>
+a href=https://kindlemodding.org/kindle-hacking/pageturner.html>Kindle Click
+/a>
+a href=https://kindlemodding.org/kindle-hacking/prototype-kindles/>Prototype Kindles
+/a>
+a href=https://kindlemodding.org/kindle-hacking/usermode-boot-process.html>Usermode Boot Process
+/a>
+/div>
+/details>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-apps-and-services/index.html>Kindle Apps & Services
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.amazon.kindle.inputMethod.html>com.amazon.kindle.inputMethod
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.adManager.html>com.lab126.adManager
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.adRotationManager.html>com.lab126.adRotationManager
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.appmgrd.html>com.lab126.appmgrd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.archive.html>com.lab126.archive
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.blanket.html>com.lab126.blanket
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.btfd.html>com.lab126.btfd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.btService.html>com.lab126.btService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.ccat.html>com.lab126.ccat
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.chromebar.html>com.lab126.chromebar
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.cmd.html>com.lab126.cmd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.contentpackd.html>com.lab126.contentpackd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.coverArtService.html>com.lab126.coverArtService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.cvm.html>com.lab126.cvm
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.demd.html>com.lab126.demd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.DeviceAuthenticationService.html>com.lab126.DeviceAuthenticationService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.deviced.html>com.lab126.deviced
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.devicemetrics.html>com.lab126.devicemetrics
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.dpm.apps.html>com.lab126.dpm.apps
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.dpmManager.html>com.lab126.dpmManager
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.extractor.java.html>com.lab126.extractor.java
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.fastMetrics.html>com.lab126.fastMetrics
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.freetime.html>com.lab126.freetime
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.grokservice.html>com.lab126.grokservice
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.household.html>com.lab126.household
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.IdentityService.html>com.lab126.IdentityService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.indexer.html>com.lab126.indexer
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.instantSearch.html>com.lab126.instantSearch
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.kaf.html>com.lab126.kaf
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.keyboard.html>com.lab126.keyboard
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.KindleIdentity.html>com.lab126.KindleIdentity
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.kindleStatusService.html>com.lab126.kindleStatusService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.KIWIBridge.html>com.lab126.KIWIBridge
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.legalComplianceService.html>com.lab126.legalComplianceService
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.linux.arm.connectionutilities.html>com.lab126.linux.arm.connectionutilities
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.pillow.html>com.lab126.pillow
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.pmond.html>com.lab126.pmond
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.powerd.html>com.lab126.powerd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.quickactions.html>com.lab126.quickactions
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.reader.readingtimer.html>com.lab126.reader.readingtimer
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.readingstreams.html>com.lab126.readingstreams
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.readnow.html>com.lab126.readnow
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.refreshCache.html>com.lab126.refreshCache
+/a>
+details>
+summary>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.scanner/index.html>com.lab126.scanner
+/a>
+/summary>
+div>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.scanner/extractors.html>Extractors
+/a>
+/div>
+/details>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.sharing.html>com.lab126.sharing
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.stored.html>com.lab126.stored
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.system.html>com.lab126.system
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.todo.html>com.lab126.todo
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.todo.kaf.html>com.lab126.todo.kaf
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.transfer.html>com.lab126.transfer
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.volumd.html>com.lab126.volumd
+/a>
+a href=https://kindlemodding.org/kindle-apps-and-services/com.lab126.winmgr.html>com.lab126.winmgr
+/a>
+/div>
+/details>
+details>
+summary>Settings
+/summary>
+select id=theme-selector style=margin-left:2em;padding:.5em;background-color:var(--background-accent);color:var(--text-colour)>
+option value=light>Light Mode
+/option>
+option value=dark>Dark Mode
+/option>
+/select>
+/details>
+script>document.getElementById("theme-selector").value=localStorage.getItem("theme"),document.getElementById("theme-selector").addEventListener("input",e=>{localStorage.setItem("theme",document.getElementById("theme-selector").value),document.startViewTransition?document.startViewTransition(()=>{refreshTheme()}):refreshTheme()})
+/script>
+/div>
+div class=pageContent>
+div class=mainContent role=main>
+h1 id=sanctuary>Sanctuary
+/h1>
+blockquote>
+p>I know not all that may be coming, but be it what it will, I&rsquo;ll go to it laughing.
+br>- Herman Melville
+/p>
+/blockquote>
+p>Sanctuary is a jailbreak released on 30/06/2026 by 
+a href=https://ko-fi.com/yubaix>Ava
+/a>, 
+a href=https://ko-fi.com/skylarplayz348>Alysa (Sky)
+/a>, 
+a href=https://give.thetrevorproject.org/give/63307#!/donation/checkout>sparklerfish
+/a>.
+/p>
+p>You can read the writeup 
+a href="https://chirp.tene7.com/?action=page&amp;url=sanctuary-self-debugging-iframes-and-injection">here
+/a>.
+/p>
+h2 id=prerequisites>Prerequisites
+/h2>
+ul>
+li>A PC, Kindle.
+/li>
+li>A supported model and firmware, as you have been led here by the 
+b>
+a href=../../jailbreak-wizard.html>Jailbreaking Wizard
+/a>
+/b>.
+/li>
+li>You have read 
+a href=../>this overview
+/a> and 
+a href=../prevent-auto-update/>filled the device
+/a>, if applicable
+/li>
+li>A Wi-Fi connection.
+/li>
+/ul>
+blockquote class=info>
+p>If you face any difficulty in following these guides, please navigate to the 
+a href=#troubleshooting>troubleshooting
+/a> section, and/or make a ticket in the KindleModding Discord support forums.
+/p>
+/blockquote>
+h2 id=installation-guide>Installation Guide
+/h2>
+div id=guide>
+div class=buttons>
+button id=prev>Previous Step
+/button>
+span id=stepCounter>
+/span>
+button id=next>Next Step
+/button>
+/div>
+div id=stepwrapper class=stepwrapper>
+div class=step>
+h2>Before Jailbreaking...
+/h2>
+div class=stepContent>
+div class=caution>
+b>Warning!
+/b>
+br>Jailbreaking often involves connecting to the Internet.
+Before beginning 
+b>any
+/b> jailbreaking process, please remember to 
+a href=../prevent-auto-update/>fill up your Kindle 
+/a>as to avoid ruining the jailbreak mid-process. Additionally, please ensure 
+b>you have read 
+a href=../>this
+/a>
+/b> before you start.
+/div>
+p>If you have done the above, please commence to the next step.
+/p>
+/div>
+/div>
+div class=step>
+h2>Navigate to your kindle's browser.
+/h2>
+div class=stepContent>
+p>On your Kindle, open the 
+b>Web Browser
+/b> (
+code>3 Dots → Web Browser
+/code>)
+/p>
+p>Then, navigate to the following URL:
+/p>
+p>
+code>http://sanctuary.skyvincent.com/scroll
+/code>
+/p>
+p>Ensure that the URL starts with 
+code>http
+/code>, not 
+code>https
+/code>
+/p>
+img src=./browser.png>
+/div>
+/div>
+div class=step>
+h2>Check browser compatibility
+/h2>
+div class=stepContent>
+p>Wait for the website to load until a scroll bar appears on the right.
+/p>
+p>Compare your scroll bar to the images below.
+/p>
+p>If your scroll bar appears to be the one on the left, you can proceed to the next step.
+/p>
+p class=warning>If your scroll bar is the one on the right, you will have to 
+a href=../../firmware-and-flashing/downloading-updates.html>manually update your firmware to the latest jailbreakable version.
+/a>
+/p>
+img src=./scroll.png>
+/div>
+/div>
+div class=step>
+h2>Navigate to the primary page, and scan ports
+/h2>
+div class=stepContent>
+p>In your browser, navigate to:
+/p>
+p>
+code>http://sanctuary.skyvincent.com/
+/code>
+/p>
+p>Once the page has loaded, port scanning will start. This can take up to 20 minutes, but requires no interaction.
+/p>
+p>Once an ID has appeared, proceed to the next step.
+/p>
+p class=note>If an ID never appears, please join the Discord server for support.
+/p>
+img src=./ports.png>
+/div>
+/div>
+div class=step>
+h2>Enter in the ID
+/h2>
+div class=stepContent>
+p>The ID will be displayed in a text box, and you must type the 
+b>exact
+/b> ID into the box below it.
+/p>
+p>The website automatically capitalizes the letters for you, so there is no need to manually capitalize while typing.
+/p>
+p>Any "0"s that may appear in the ID are zeroes. The only characters the ID can contain are 
+code>0123456789ABCDEF
+/code>.
+/p>
+img src=./id.png>
+/div>
+/div>
+div class=step>
+h2>Click the "Connect" button
+/h2>
+div class=stepContent>
+p>Upon ensuring that the typed id 
+b>exactly
+/b> matches the upper ID, you may hit the "Connect" button.
+/p>
+p>If nothing happens, or an error appears, then the ID was entered in wrong. Try re-typing the ID.
+/p>
+/div>
+/div>
+div class=step>
+h2>Check webpage output
+/h2>
+div class=stepContent>
+p>Ensure "Downloads Done" appears at the top of the webpage.
+/p>
+p>Also, notifications indicating that 
+code>appreg.db
+/code>, 
+code>appreg.db.bak
+/code>, and 
+code>privesc.sh
+/code> downloaded should have appeared.
+/p>
+p class=note>You may only see one or two popups confirming the downloads. This is normal and expected if multiple downloads completed before the dialog was dismissed, and does not mean that the download was unsuccessful.
+/p>
+img src=./success.png>
+/div>
+/div>
+div class=step>
+h2>Exit the browser
+/h2>
+div class=stepContent>
+p>Quit the browser by hitting the X in the upper right corner of the browser.
+/p>
+p>
+/p>
+p class=warning>Do 
+b>not
+/b> disable Wi-Fi at this point. It is required until the final step of the jailbreak is completed.
+/p>
+/div>
+/div>
+div class=step>
+h2>Navigate to "Help"
+/h2>
+div class=stepContent>
+p>Using the same 3 dots menu you used to access the browser at the start, select "Settings".
+/p>
+p>In Settings, click the "Help" menu.
+/p>
+img src=./select.png>
+/div>
+/div>
+div class=step>
+h2>Jailbreak!
+/h2>
+div class=stepContent>
+p>Click "Getting Started".
+/p>
+p>Some text should appear, signifying a successful jailbreak! 
+b>Application Errors are expected and may be ignored!
+/b>
+/p>
+img src=./jailbreak.png>
+/div>
+/div>
+div class=step>
+h2>After Jailbreaking...
+/h2>
+div class=stepContent>
+div class=tip>
+b>What's Next?
+/b>
+br>Commence to the 
+a href=../whats-next>What's Next
+/a> section to read about installing scriptlets, homebrew, and KOReader.
+br>Read the 
+b>whole section
+/b> thoroughly.
+/div>
+div class=caution>You may now 
+b>delete
+/b> any filler files. Updates have been automatically blocked for you.
+br>
+br>Before you do this, also 
+b>remove any existing update files with a 
+code>.bin
+/code> extension
+/b>, if they exist in the Kindle's root.
+/div>
+p>Have fun! :)
+/p>
+/div>
+/div>
+/div>
+div class=buttons>
+button id=prev>Previous Step
+/button>
+span id=stepCounter>
+/span>
+button id=next>Next Step
+/button>
+/div>
+/div>
+script>new Guide("guide","../whats-next","What's Next?")
+/script>
+h2 id=troubleshooting>Troubleshooting
+/h2>
+ol>
+li>Text not appearing after hitting connect? Ensure that you correctly entered your ID. All letters should automatically be made uppercase by the website.
+/li>
+/ol>
+h2 id=credits>Credits
+/h2>
+ul>
+li>
+a href=https://ko-fi.com/yubaix>Ava
+/a> - Found and engineered the privesc, wrote this wiki page, PW4 5.18.1.1.1 testing.
+/li>
+li>
+a href=https://give.thetrevorproject.org/give/63307#!/donation/checkout>sparklerfish
+/a> - Large amount of JS coding + webpage design, screenshots for this guide, as well as PW4 5.18.1 testing.
+/li>
+li>
+a href=https://ko-fi.com/fuzzyghosty>Alysa
+/a> - JS development as well as extensive CS SE testing.
+/li>
+li>
+a href=https://ko-fi.com/scamdotnet1>Scam.net
+/a> - POC assistance, minor troubleshooting with modifying the DB file, PW5 testing.
+/li>
+li>
+a href=https://ko-fi.com/hackerdude>HackerDude
+/a> - JB.sh implementation assistance.
+/li>
+li>Gimzie - Exemplary beta tester, tested for hours and was the first successful jailbreak.
+/li>
+li>Thanks to all beta-testers: Gimzie, scam.net, mergen3107, TheMAXX, PluPlu, corniest_tortilla
+/li>
+/ul>
+/div>
+div class=footer role=contentinfo>
+span>
+/span>
+a style=margin:.5em href=https://github.com/KindleModding/kindlemodding.github.io>GitHub
+/a>
+a style=margin:.5em href=https://ko-fi.com/hackerdude>Donate!
+/a>
+br>
+br>
+br>
+br>
+ins class=adsbygoogle data-ad-client=ca-pub-4468899728405672 data-ad-slot=9487924817 data-ad-format=auto data-full-width-responsive=true>
+/ins>
+ins class=adsbygoogle data-ad-format=autorelaxed data-ad-client=ca-pub-4468899728405672 data-ad-slot=1868153772>
+/ins>
+ins class=adsbygoogle data-ad-format=autorelaxed data-ad-client=ca-pub-4468899728405672 data-ad-slot=1868153772>
+/ins>
+script>addEventListener("load",()=>{(adsbygoogle=window.adsbygoogle||[]).push({}),(adsbygoogle=window.adsbygoogle||[]).push({})})
+/script>
+/div>
+/div>
+/div>
+/body>
+/html>

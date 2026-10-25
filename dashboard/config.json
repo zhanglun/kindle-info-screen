@@ -1,0 +1,15 @@
+{
+  "city": "杭州",
+  "interval_min": 10,
+  "port": 8787,
+  "rss_sources": [
+    {"name": "少数派", "url": "https://sspai.com/feed"},
+    {"name": "IT之家", "url": "https://www.ithome.com/rss/"}
+  ],
+  "countdowns": [
+    {"name": "元旦", "date": "2027-01-01"},
+    {"name": "春节", "date": "2027-02-06"}
+  ],
+  "rss_count": 4,
+  "todo_file": "todo.txt"
+}

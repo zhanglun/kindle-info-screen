@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+
+<!-- Copyright HackerDude -->
+
+<html>
+<head>
+  <meta name="viewport" content="user-scalable=no"/>
+  <script src="file:///mnt/us/mesquito/polyfill.min.js"></script>
+  <script src="file:///mnt/us/mesquito/sdk.js"></script>
+  <script src="./main.js"></script>
+  <script src="./inspect.js"></script>
+
+  <link href="./main.css" rel="stylesheet">
+
+  <title>WinterBreak</title>
+  
+  <script>
+    var kindle = window.kindle || top.kindle;
+  </script>
+</head>
+<body>
+  <div id="mainBody">
+    <h1>WinterBreak</h1>
+    <p>2.1.0</p>
+    <p>"After all, all devices have their dangers. The discovery of speech introduced communication - and lies."</p>
+    <p>- Isaac Asimov</p>
+    <textarea rows=10 id="log"></textarea>
+  </div>
+
+  <script>
+    function log(logStuff) {
+        document.getElementById("log").innerHTML += "\n" + logStuff.toString();
+        document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
+    }
+
+    log("Jailbreaking - Please Wait...");
+    setTimeout(function jailbreak() {
+      kindle.messaging.sendMessage("com.lab126.pillow", "customDialog", { name: "../../../../../../mnt/us/apps/tech.hackerdude.winterbreak/dialoger", clientParams:{show:true, jsEnabled:false} });
+    }, 2000); // Wait 2 seconds (Literally just so they can read the quote lol)
+  </script>
+</body>
+</html>

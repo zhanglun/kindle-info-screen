@@ -1,0 +1,11 @@
+# Edge 无头浏览器临时配置(运行时生成)
+dashboard/out/edge_profile/
+
+# 渲染中间产物(每次刷新重新生成)
+dashboard/out/rendered.html
+
+# 参考用的第三方仓库克隆(自带 .git,不入库)
+jailbreak-tools/kindle-screensavers/
+
+# 运行日志
+*.log
