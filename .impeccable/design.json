@@ -1,0 +1,34 @@
+{
+  "world": "signals-instruments-split-flap-concourse (translated: 车站翻牌出发信息牌)",
+  "surface": "dashboard-rs/resources/webui.html",
+  "mode": "operate",
+  "seed": "seed:e0be6f8d0110fc36",
+  "buildPath": "code",
+  "palette": {
+    "ground": "#0f0f0f",
+    "panel": "#121212",
+    "panel-warm": "#16130c",
+    "flap-lit": "#1a1a1a",
+    "flap-shadow": "#050505",
+    "input-well": "#060606",
+    "letter": "#f2f2ef",
+    "dim": "#969696",
+    "steel-frame": "#2a2d31",
+    "steel-edge": "#586060",
+    "hairline": "#26292d",
+    "amber": "#ffb000",
+    "failure-surface": "#b00d20",
+    "failure-text": "#ff6b6b"
+  },
+  "singleFontSize": "14px",
+  "jurisdictions": {
+    "amber": "状态与可动之处(状态格/主行动/开关开/选中行/选中高亮/caret/选区/焦点环)",
+    "failure-surface": "仅 toast 表面; 文字用 #ff6b6b 浅调",
+    "gray": "结构(框/界行/井), 不做语义"
+  },
+  "signatureMove": "状态翻牌格(rotateX 320ms) + Departures 渲染史账目行(落款不消失)",
+  "motion": {
+    "statusFlip": "transform rotateX 0→88°→0, 320ms ease-in-out, 仅状态变化时"
+  },
+  "notCanonized": []
+}

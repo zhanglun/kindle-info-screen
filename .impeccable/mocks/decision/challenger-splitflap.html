@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  /* 翻牌站牌 —— 磨砂黑翻牌 · 白漆字 · 琥珀状态 · 固定列行
+     模板列表与渲染状态都是"车次行" */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #101010; color: #f2f2ef;
+    font-family: -apple-system, "PingFang SC", sans-serif; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 22px 34px 40px; }
+
+  header { display: flex; align-items: center; gap: 16px; background: #1b1b1b;
+    border: 1px solid #2c2c2c; padding: 10px 18px; }
+  h1 { font-size: 20px; font-weight: 800; letter-spacing: 6px; }
+  .sub { font-family: "Menlo", monospace; font-size: 11px; color: #6f6f6f; letter-spacing: 1px; }
+  .lamp { margin-left: auto; display: flex; align-items: center; gap: 8px;
+    font-family: "Menlo", monospace; font-size: 12px; color: #ffb300; }
+  .lamp i { width: 9px; height: 9px; border-radius: 50%; background: #ffb300; }
+
+  .board { margin-top: 16px; border: 3px solid #3a3a3a; background: #161616; }
+  .brow { display: grid; grid-template-columns: 200px 1fr 150px 130px;
+    border-bottom: 1px solid #232323; }
+  .brow.head { font-family: "Menlo", monospace; font-size: 11px; color: #6f6f6f;
+    letter-spacing: 2px; background: #1b1b1b; }
+  .cell { padding: 12px 16px; font-size: 15px; letter-spacing: 1px; }
+  .flap { display: inline-block; background: #060606; border: 1px solid #2a2a2a;
+    padding: 3px 10px; margin: -1px -1px; }
+
+  .dest { font-weight: 800; }
+  .st-ok { color: #f2f2ef; }
+  .st-run { color: #ffb300; }
+  .row-sel { background: #201d12; box-shadow: inset 3px 0 0 #ffb300; }
+
+  .side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .panel { border: 1px solid #2c2c2c; background: #161616; padding: 14px 16px; }
+  .panel h2 { font-family: "Menlo", monospace; font-size: 11px; letter-spacing: 2px;
+    color: #6f6f6f; margin-bottom: 10px; }
+  .fld { display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid #232323; font-size: 14px; }
+  .fld .k { width: 76px; color: #9a9a9a; flex: none; }
+  .fld input { flex: 1; font: inherit; color: #f2f2ef; background: #060606;
+    border: 1px solid #2a2a2a; padding: 6px 10px; }
+  .fld input:focus { outline: none; border-color: #ffb300; }
+
+  .press { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+  .btn { font: inherit; font-size: 14px; font-weight: 800; letter-spacing: 2px;
+    background: #ffb300; color: #101010; border: none; padding: 10px 26px; cursor: pointer; }
+  .btn.ghost { background: #060606; color: #f2f2ef; border: 1px solid #2a2a2a; }
+  .meta { margin-left: auto; font-family: "Menlo", monospace; font-size: 11px; color: #6f6f6f; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>信息屏 · 翻牌板</h1>
+    <span class="sub">INFO BOARD CONTROL · PLATFORM 8787</span>
+    <span class="lamp"><i></i>ON TIME · LAST RENDER 12:25</span>
+  </header>
+
+  <div class="board">
+    <div class="brow head">
+      <span class="cell">SERVICE</span><span class="cell">MODULES</span>
+      <span class="cell">ORIENTATION</span><span class="cell">STATUS</span>
+    </div>
+    <div class="brow row-sel">
+      <span class="cell dest"><span class="flap">时刻表</span></span>
+      <span class="cell">天气 · 倒数日 · 待办 · 日程 · 热榜</span>
+      <span class="cell"><span class="flap">LANDSCAPE</span></span>
+      <span class="cell st-run"><span class="flap">RENDERING</span></span>
+    </div>
+    <div class="brow">
+      <span class="cell dest"><span class="flap">信息日报</span></span>
+      <span class="cell">天气 · 农历 · 一言 · RSS</span>
+      <span class="cell"><span class="flap">PORTRAIT</span></span>
+      <span class="cell st-ok"><span class="flap">ON TIME</span></span>
+    </div>
+    <div class="brow">
+      <span class="cell dest"><span class="flap">相框</span></span>
+      <span class="cell">每日壁纸 · 角标信息</span>
+      <span class="cell"><span class="flap">PORTRAIT</span></span>
+      <span class="cell st-ok"><span class="flap">READY</span></span>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h2>WORK ORDER</h2>
+      <div class="fld"><span class="k">城市</span><input value="杭州"></div>
+      <div class="fld"><span class="k">刷新间隔</span><input value="10 min" style="max-width:120px"></div>
+      <div class="fld"><span class="k">日程源</span><input value="ics://calendar.icloud.com/…"></div>
+      <div class="press">
+        <button class="btn">刷新上屏</button>
+        <button class="btn ghost">仅保存</button>
+        <span class="meta">NEXT AUTO 12:35</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>DEPARTURES · 渲染史</h2>
+      <div class="fld" style="border-bottom:none"><span class="k" style="font-family:'Menlo',monospace">12:25</span>
+        <span class="cell st-run" style="padding:0">OK · TIMETABLE · 1448×1072 · 56 KB</span></div>
+      <div class="fld" style="border-bottom:none"><span class="k" style="font-family:'Menlo',monospace">12:15</span>
+        <span class="cell st-ok" style="padding:0">OK · TIMETABLE · PORTRAIT · 91 KB</span></div>
+      <div class="fld" style="border-bottom:none"><span class="k" style="font-family:'Menlo',monospace">12:05</span>
+        <span class="cell st-ok" style="padding:0">OK · DAILY · PORTRAIT · 99 KB</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

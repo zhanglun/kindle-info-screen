@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  /* 文人笺纸与印章 —— 信息屏控制台
+     宣纸底 · 墨色正文 · 朱丝栏界行 · 朱印做状态戳 · 竖排题签 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #f5efe2; color: #26211a;
+    font-family: "Songti SC", "STSong", serif; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 26px 34px 40px; }
+
+  /* 题头: 横题名 + 朱印状态 */
+  header { display: flex; align-items: flex-end; gap: 22px;
+    border-bottom: 3px double #26211a; padding-bottom: 14px; }
+  h1 { font-size: 34px; font-weight: 900; letter-spacing: 10px; }
+  .sub { color: #6f6555; font-size: 13px; padding-bottom: 5px; }
+  .stamp { margin-left: auto; width: 64px; height: 64px; border: 3px solid #b5402c;
+    color: #b5402c; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; letter-spacing: 2px; line-height: 1.15;
+    writing-mode: vertical-rl; text-orientation: upright;
+    transform: rotate(-4deg); border-radius: 4px; opacity: .92; }
+
+  /* 朱丝栏: 红色界行贯穿内容区 */
+  .sheet { position: relative; margin-top: 20px; padding: 18px 26px;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 51px, rgba(181,64,44,.38) 51px 52px);
+    background-position: 0 18px; }
+  .sheet::before { content: ""; position: absolute; inset: 0 18px;
+    border-left: 1px solid rgba(181,64,44,.45); border-right: 1px solid rgba(181,64,44,.45); }
+
+  .cols { display: grid; grid-template-columns: 46% 1fr; column-gap: 40px; position: relative; }
+
+  /* 预览: 裱在绢边里的屏 */
+  .preview .tag { font-size: 13px; letter-spacing: 6px; color: #6f6555; margin-bottom: 8px; }
+  .frame { border: 1px solid #c9bda3; padding: 10px; background: #fbf8ef;
+    box-shadow: 2px 3px 0 rgba(38,33,26,.12); }
+  .frame img { width: 100%; display: block; }
+
+  /* 款目行: 每行一项, 界行内 */
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 2px 11px; min-height: 52px; }
+  .row .k { width: 96px; font-size: 15px; color: #4c4437; letter-spacing: 2px; flex: none; }
+  .row .v { flex: 1; font-size: 15px; }
+  input, select { font: inherit; color: inherit; background: transparent;
+    border: none; border-bottom: 1px solid #b3a88f; padding: 3px 2px; width: 100%; }
+  input:focus { outline: none; border-bottom-color: #b5402c; }
+
+  /* 模板选择: 题签式 */
+  .tpls { display: flex; flex-direction: column; }
+  .tpl { display: flex; align-items: baseline; gap: 10px; padding: 9px 2px;
+    border-bottom: 1px solid rgba(181,64,44,.28); cursor: pointer; }
+  .tpl .dot { width: 9px; height: 9px; border: 1.5px solid #26211a; border-radius: 50%; flex: none; }
+  .tpl.sel .dot { background: #b5402c; border-color: #b5402c; }
+  .tpl.sel .n { font-weight: 900; }
+  .tpl .n { font-size: 16px; letter-spacing: 1px; }
+  .tpl .o { margin-left: auto; font-size: 12px; color: #8a7d68; }
+
+  /* 操作: 墨底白字 + 款识 */
+  .actions { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+  .btn { font: inherit; font-size: 15px; letter-spacing: 3px; background: #26211a; color: #f5efe2;
+    border: none; padding: 9px 26px; cursor: pointer; }
+  .btn.ghost { background: transparent; color: #26211a; border: 1px solid #26211a; }
+  .ledger { margin-left: auto; font-size: 12px; color: #8a7d68; text-align: right; line-height: 1.7; }
+  .ledger b { color: #b5402c; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>信息屏笺</h1>
+    <span class="sub">KINDLE INFO SCREEN · 配置簿</span>
+    <div class="stamp">已上屏</div>
+  </header>
+
+  <div class="sheet">
+    <div class="cols">
+      <section class="preview">
+        <div class="tag">今 日 之 屏</div>
+        <div class="frame">
+          <img alt="预览" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='560'%3E%3Crect width='420' height='560' fill='%23efe9da'/%3E%3Ctext x='30' y='70' font-family='serif' font-size='34' fill='%2326211a' font-weight='900'%3E信息日报%3C/text%3E%3Cline x1='30' y1='90' x2='390' y2='90' stroke='%2326211a' stroke-width='3'/%3E%3Ctext x='30' y='150' font-family='serif' font-size='56' fill='%2326211a' font-weight='900'%3E21°%3C/text%3E%3Ctext x='30' y='200' font-family='serif' font-size='20' fill='%234c4437'%3E晴 · 杭州 · 距周末 5 天%3C/text%3E%3C/svg%3E">
+        </div>
+      </section>
+
+      <section>
+        <div class="tpls">
+          <div class="tpl sel"><span class="dot"></span><span class="n">信息日报</span><span class="o">竖版</span></div>
+          <div class="tpl"><span class="dot"></span><span class="n">大字报极简</span><span class="o">竖 / 横</span></div>
+          <div class="tpl"><span class="dot"></span><span class="n">时刻表</span><span class="o">竖 / 横</span></div>
+          <div class="tpl"><span class="dot"></span><span class="n">相框</span><span class="o">竖 / 横</span></div>
+        </div>
+        <div class="row"><span class="k">城市</span><span class="v"><input value="杭州"></span></div>
+        <div class="row"><span class="k">刷新</span><span class="v"><input value="每 10 分钟" style="max-width:140px"></span></div>
+        <div class="row"><span class="k">日程</span><span class="v"><input value="订阅 iCloud 日历链接…"></span></div>
+        <div class="row"><span class="k">热榜</span><span class="v"><input value="微博 · 知乎" style="max-width:200px"></span></div>
+        <div class="actions">
+          <button class="btn">落 墨 上 屏</button>
+          <button class="btn ghost">即刻重渲</button>
+          <div class="ledger">十二时廿五 落墨讫<br><b>朱记</b> 连 render 第 41 次</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

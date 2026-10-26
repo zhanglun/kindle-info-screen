@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  /* 日式高密度 —— 纯白 · 墨黑小字 · 信号红 tab · 细线分格 · 密度勇气
+     每个模块一个红头小格, 满排不浪费 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #ffffff; color: #111111;
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif; font-size: 13px; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 14px 18px 30px; }
+
+  header { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #111; padding-bottom: 8px; }
+  h1 { font-size: 17px; font-weight: 800; letter-spacing: 2px; }
+  .sub { font-size: 11px; color: #767676; }
+  .live { margin-left: auto; display: flex; gap: 6px; }
+  .tag { font-size: 11px; border: 1px solid #111; padding: 2px 8px; }
+  .tag.red { background: #e60012; color: #fff; border-color: #e60012; }
+
+  .mosaic { display: grid; grid-template-columns: 380px 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .mod { border: 1px solid #d9d9d9; }
+  .mod .head { display: flex; align-items: center; }
+  .mod .tab { background: #e60012; color: #fff; font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; padding: 3px 10px; }
+  .mod .en { font-size: 10px; color: #9a9a9a; letter-spacing: 1px; margin-left: 8px; }
+  .mod .act { margin-left: auto; font-size: 11px; color: #e60012; padding-right: 8px; }
+  .mod .bd { padding: 10px 12px 12px; }
+
+  img { width: 100%; display: block; border: 1px solid #e5e5e5; }
+
+  .frow { display: flex; align-items: center; gap: 8px; padding: 5px 0;
+    border-bottom: 1px dashed #e0e0e0; font-size: 12px; }
+  .frow:last-child { border-bottom: none; }
+  .frow .k { width: 64px; color: #767676; flex: none; }
+  .frow input, .frow select { flex: 1; font: inherit; font-size: 12px; color: #111;
+    border: 1px solid #d9d9d9; padding: 4px 8px; background: #fff; }
+  .frow input:focus { outline: none; border-color: #e60012; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 11px; border: 1px solid #111; padding: 2px 8px; cursor: pointer; }
+  .chip.on { background: #111; color: #fff; }
+  .chip .o { color: #9a9a9a; font-size: 10px; margin-left: 3px; }
+
+  .btns { display: flex; gap: 8px; padding: 10px 0 2px; }
+  .btn { font: inherit; font-size: 12px; font-weight: 700; background: #e60012; color: #fff;
+    border: none; padding: 7px 20px; cursor: pointer; }
+  .btn.ghost { background: #fff; color: #111; border: 1px solid #111; }
+  .note { font-size: 10px; color: #9a9a9a; margin-left: auto; }
+
+  .list li { list-style: none; display: flex; gap: 6px; font-size: 12px;
+    padding: 4px 0; border-bottom: 1px dashed #eee; }
+  .list .t { color: #767676; font-family: "Menlo", monospace; font-size: 10px; padding-top: 1px; }
+  .r { color: #e60012; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Kindle 信息屏</h1>
+    <span class="sub">CONFIG CONSOLE</span>
+    <span class="live"><span class="tag red">已上屏 12:25</span><span class="tag">自动 12:35</span><span class="tag">192.168.89.1:8787</span></span>
+  </header>
+
+  <div class="mosaic">
+    <div class="mod">
+      <div class="head"><span class="tab">预览</span><span class="en">PREVIEW</span><span class="act">原尺寸 →</span></div>
+      <div class="bd"><img alt="" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='480'%3E%3Crect width='360' height='480' fill='%23fafafa'/%3E%3Crect x='0' y='0' width='360' height='34' fill='%23111111'/%3E%3Ctext x='12' y='23' font-size='13' fill='white' font-weight='bold'%3EINFO BOARD%3C/text%3E%3Ctext x='12' y='80' font-size='40' fill='%23111111' font-weight='bold'%3E12:25%3C/text%3E%3Ctext x='12' y='120' font-size='14' fill='%23555'%3E晴 21° · 杭州 · 距周末5天%3C/text%3E%3C/svg%3E"></div>
+    </div>
+
+    <div class="mod">
+      <div class="head"><span class="tab">版面</span><span class="en">TEMPLATE</span></div>
+      <div class="bd">
+        <div class="chips">
+          <span class="chip on">时刻表<span class="o">竖/横</span></span>
+          <span class="chip">信息日报<span class="o">竖</span></span>
+          <span class="chip">大字报极简<span class="o">竖/横</span></span>
+          <span class="chip">相框<span class="o">竖/横</span></span>
+          <span class="chip">专注大字钟<span class="o">竖/横</span></span>
+        </div>
+        <div class="frow" style="margin-top:8px"><span class="k">朝向</span>
+          <select><option>横版 1448×1072</option><option>竖版 1072×1448</option></select></div>
+        <div class="frow"><span class="k">城市</span><input value="杭州"></div>
+        <div class="frow"><span class="k">刷新</span><input value="10" style="max-width:70px"><span style="font-size:11px;color:#767676">分钟</span></div>
+        <div class="btns"><button class="btn">保存并刷新</button><button class="btn ghost">仅保存</button>
+          <span class="note">端口修改需重启生效</span></div>
+      </div>
+    </div>
+
+    <div class="mod">
+      <div class="head"><span class="tab">模块</span><span class="en">MODULES</span><span class="act">全部展开</span></div>
+      <div class="bd">
+        <div class="frow"><span class="k">天气</span><input value="杭州 · open-meteo"></div>
+        <div class="frow"><span class="k">日程</span><input value="ics://calendar.icloud.com/…"></div>
+        <div class="frow"><span class="k">热榜</span>
+          <div class="chips" style="flex:1">
+            <span class="chip on">微博</span><span class="chip on">知乎</span>
+            <span class="chip">B站</span><span class="chip">GitHub</span></div></div>
+        <div class="frow"><span class="k">壁纸</span><input value="Bing 每日一图" style="max-width:150px">
+          <select style="flex:0 0 88px"><option>抖动灰度</option></select></div>
+      </div>
+    </div>
+
+    <div class="mod" style="grid-column: 1 / -1">
+      <div class="head"><span class="tab">渲染史</span><span class="en">RENDER LOG</span><span class="act">清空</span></div>
+      <div class="bd"><ul class="list">
+        <li><span class="t">12:25</span><span class="r">OK</span><span>时刻表 · 横版 · 1448×1072 · 56 KB · 41st render</span></li>
+        <li><span class="t">12:15</span><span class="r">OK</span><span>时刻表 · 竖版 · 1072×1448 · 91 KB</span></li>
+        <li><span class="t">12:05</span><span class="r">OK</span><span>信息日报 · 竖版 · 99 KB</span></li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  /* 排字车间 —— 铅字盘与字架
+     深木底 · 纸样白卡 · 铜色工具 · 字盘格选模板 · 排字状态条 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #241d15; color: #ede4d2;
+    font-family: "Songti SC", "STSong", serif; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 24px 34px 40px; }
+
+  header { display: flex; align-items: baseline; gap: 18px; padding-bottom: 14px;
+    border-bottom: 1px solid #4a3f2e; }
+  h1 { font-size: 30px; font-weight: 900; letter-spacing: 8px; color: #ede4d2; }
+  .sub { font-family: "Menlo", monospace; font-size: 11px; letter-spacing: 2px; color: #8d7c60; }
+  .job { margin-left: auto; font-family: "Menlo", monospace; font-size: 12px; color: #d8b276; }
+
+  .cols { display: grid; grid-template-columns: 44% 1fr; gap: 30px; margin-top: 20px; }
+
+  /* 拼好版: 预览是一块上版纸样, 别在版台上 */
+  .stone { background: #1c1610; border: 1px solid #4a3f2e; padding: 14px; position: relative; }
+  .stone .pin { position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: #c98f4e; top: -5px; left: 50%; transform: translateX(-50%); }
+  .galley { background: #f0e8d6; color: #241d15; padding: 22px; min-height: 480px; }
+  .galley .mast { font-size: 30px; font-weight: 900; letter-spacing: 8px; border-bottom: 3px solid #241d15; padding-bottom: 8px; }
+  .galley .body { margin-top: 14px; color: #4c4437; font-size: 13px; line-height: 2; }
+
+  /* 右侧: 字盘选版 + 工单 */
+  h2 { font-size: 12px; letter-spacing: 5px; color: #8d7c60; margin: 4px 0 10px; }
+  .case { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .sort { border: 1px solid #4a3f2e; padding: 10px 12px; cursor: pointer; background: #2b2318; }
+  .sort .n { font-size: 15px; letter-spacing: 2px; }
+  .sort .m { font-family: "Menlo", monospace; font-size: 10px; color: #8d7c60; margin-top: 3px; }
+  .sort.sel { background: #c98f4e; color: #241d15; border-color: #c98f4e; }
+  .sort.sel .m { color: #6b4e26; }
+
+  .ticket { margin-top: 18px; border-top: 1px dashed #4a3f2e; }
+  .line { display: flex; align-items: baseline; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid #332a1d; font-size: 14px; }
+  .line .k { width: 84px; color: #8d7c60; flex: none; letter-spacing: 2px; }
+  .line input { flex: 1; font: inherit; color: #ede4d2; background: transparent;
+    border: none; border-bottom: 1px dashed #4a3f2e; }
+  .line input:focus { outline: none; border-bottom-color: #c98f4e; }
+
+  .press { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
+  .btn { font: inherit; font-size: 14px; letter-spacing: 4px; background: #c98f4e; color: #241d15;
+    border: none; padding: 10px 28px; cursor: pointer; font-weight: 900; }
+  .btn.ghost { background: transparent; color: #ede4d2; border: 1px solid #4a3f2e; font-weight: 400; }
+  .log { margin-left: auto; font-family: "Menlo", monospace; font-size: 11px; color: #8d7c60; text-align: right; line-height: 1.7; }
+  .log b { color: #d8b276; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>信息屏排字房</h1>
+    <span class="sub">COMPOSING ROOM · JOB Nº041</span>
+    <span class="job">PRESS: IDLE → NEXT RUN 10 MIN</span>
+  </header>
+
+  <div class="cols">
+    <section class="stone">
+      <div class="pin"></div>
+      <div class="galley">
+        <div class="mast">信息日报</div>
+        <div class="body">
+          十月廿六 · 周一 · 农历九月十七<br>
+          晴 21° · 杭州 · 霜降后三天<br>
+          距周末 5 天 · 距元旦 67 天<br>
+          ─────────────────────<br>
+          待办三件 · 资讯暂缺 · 一言候补
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>拣 字 盘 · 选 版 式</h2>
+      <div class="case">
+        <div class="sort sel"><div class="n">信息日报</div><div class="m">PORTRAIT · 1072×1448</div></div>
+        <div class="sort"><div class="n">大字报极简</div><div class="m">PORTRAIT / LANDSCAPE</div></div>
+        <div class="sort"><div class="n">时刻表</div><div class="m">PORTRAIT / LANDSCAPE</div></div>
+        <div class="sort"><div class="n">相框</div><div class="m">PORTRAIT / LANDSCAPE</div></div>
+      </div>
+
+      <div class="ticket">
+        <h2 style="margin-top:16px">工 单</h2>
+        <div class="line"><span class="k">城市</span><input value="杭州"></div>
+        <div class="line"><span class="k">刷新</span><input value="每 10 分钟" style="max-width:150px"></div>
+        <div class="line"><span class="k">日程</span><input value="ics 订阅链接…"></div>
+        <div class="line"><span class="k">热榜</span><input value="微博 · 知乎" style="max-width:220px"></div>
+      </div>
+
+      <div class="press">
+        <button class="btn">开 印</button>
+        <button class="btn ghost">重排一版</button>
+        <div class="log">41st impression 12:25<br><b>type set · ready to press</b></div>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

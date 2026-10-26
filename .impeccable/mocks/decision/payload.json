@@ -1,0 +1,93 @@
+{
+  "title": "信息屏控制台 · 视觉世界",
+  "question": "Web 配置页重造为哪个视觉世界?同一产品内容,四种血统。(未上桌留池: 温暖消费卡片、竖屏视频流——前者即类目标准)",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "翻牌站牌",
+      "kicker": "THE ROLL",
+      "lineage": "车站翻牌出发信息牌",
+      "thesis": "控制台就是出发信息牌:每个模板一行「车次」,模块清单是途经站,渲染状态以 ON TIME / RENDERING 翻牌呈现,保存触发一次逐字翻落。",
+      "palette": ["#101010", "#f2f2ef", "#ffb300", "#b00020"],
+      "materials": ["磨砂黑翻牌", "白漆字", "琥珀状态灯", "等宽款识"],
+      "viewport": "顶栏状态灯牌;三板式翻牌板列模板行;下方工单与 Departures 渲染史双栏,全部行式固定列。",
+      "risk": "复古 novelty 感——翻牌动画不克制就成玩具;黑底控制台与屏上白纸成品气质相反而非同宗。",
+      "raised": [
+        {"from": "rw-timetable-slide-rack", "raise": "单一字号纪律:整控制台只有一个字号,等级全靠字重、反白条与界线承担,不用字号做层级。"},
+        {"from": "aww2-zoo-gardens-guide-map", "raise": "色块分区:工单/渲染史两大区以整块色域划分,不靠线框描边。"},
+        {"from": "vernacular-ephemera-jet-age-ticket-wallet", "raise": "官方套色的克制:黑/白/琥珀之外不加任何颜色,取消红只留给失败状态。"}
+      ],
+      "html": ".impeccable/mocks/decision/challenger-splitflap.html",
+      "comp": ".impeccable/mocks/decision/assigned-splitflap.webp",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse.webp"
+    },
+    {
+      "id": "model-pick",
+      "kind": "pick",
+      "label": "文人笺纸与印章",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "八行笺 · 朱丝栏 · 文人用印",
+      "thesis": "配置簿是一页信笺:朱丝栏界行承载模块,朱红印章做状态戳,保存即「落墨上屏」并盖「已上屏」印,渲染史是右下角落款列。",
+      "palette": ["#f5efe2", "#26211a", "#b5402c", "#8a7d68"],
+      "materials": ["宣纸底", "朱丝栏界行", "朱印", "宋体/楷体"],
+      "viewport": "题头横题名配旋转朱印「已上屏」;左页大预览裱绢边,右页笺上行行是模块,款识记录渲染落款。",
+      "risk": "也是我自己最想做的方向——它最贴产品纸面血统,但界格稀疏就只剩古装;控制件必须保持标准件,印章只做状态不做按钮。",
+      "html": ".impeccable/mocks/decision/assigned-jianzhi.html",
+      "comp": ".impeccable/mocks/decision/pick-jianzhi.webp"
+    },
+    {
+      "id": "challenger-slides",
+      "kind": "challenger",
+      "catalogId": "rw-timetable-slide-rack",
+      "label": "时刻表玻璃片架",
+      "verdict": "competitive",
+      "lineage": "航空时刻表玻璃幻灯片架",
+      "thesis": "金盏黄灯箱上斜插色玻璃片:每个模块是一片幻灯片,全页单一字号,等级全靠字重、反白条与界线。",
+      "palette": ["#d9a441", "#f4e3ba", "#241c0d", "#eed49a"],
+      "materials": ["金盏黄灯箱", "色玻璃片", "反白条", "硬投影"],
+      "viewport": "三片幻灯片斜插片架:预览片、版面片(含工单)、模块片(含渲染史),硬投影制造插片层次。",
+      "case": "单一字号系统对「模块越来越多」最耐用,暖色灯箱气质与墨水屏暖纸感同宗;输在反白条层级对复杂表单表达力有限。",
+      "risk": "全页一个字号在密集表单处易显平。"
+    },
+    {
+      "id": "challenger-tickets",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-jet-age-ticket-wallet",
+      "label": "喷气时代票夹",
+      "verdict": "declined",
+      "lineage": "喷气时代机票票夹",
+      "palette": ["#f6f1e6", "#1c3f94", "#c8102e", "#d9d2c0"],
+      "materials": ["碳复写联票", "官方套色", "登机牌齿孔"],
+      "case": "票联隐喻与配置任务错位——配置项不是旅程段;整体气质偏西方官方印刷,与中文纸面血统不合。",
+      "kept": "状态是「戳记」不是消失——取消/失败以戳记留在票面上,不弹走。"
+    },
+    {
+      "id": "challenger-zoo",
+      "kind": "challenger",
+      "catalogId": "aww2-zoo-gardens-guide-map",
+      "label": "园区导览图",
+      "verdict": "declined",
+      "lineage": "动植物园分区导览图",
+      "palette": ["#eaf0e2", "#d96f32", "#3f7f6e", "#26401f"],
+      "materials": ["平涂色块肺叶", "海岸线分界", "圆体标签"],
+      "case": "导览图的空间隐喻与配置台的任务模型错位——配置项之间没有「园路」;仅保留色块分区纪律赠予主方向。",
+      "kept": "色块承担分区而非线框——大区块用整块色域划分。"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": true },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "类目标准",
+    "thesis": "干净卡片式设置后台做到极致——这个类目一贯交付的样子。",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["干净栅格", "圆角卡片", "系统字"],
+    "viewport": "访客闭眼也画得出的设置页排布,工艺拉满。",
+    "risk": "刻意与所有竞品无差别。",
+    "comp": ".impeccable/mocks/decision/canon.webp"
+  },
+  "steer": true
+}
