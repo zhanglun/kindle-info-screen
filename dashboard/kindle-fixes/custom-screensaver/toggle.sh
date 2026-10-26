@@ -4,7 +4,8 @@
 
 BASE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 DAEMON="$BASE/custom_ss_daemon.sh"
-FBINK="$BASE/bin/fbink_hf"
+FBINK=/tmp/custom-ss-fbink
+mkdir -p /tmp/custom-ss && cp -f "$BASE/bin/fbink_hf" /tmp/custom-ss-fbink 2>/dev/null && chmod +x /tmp/custom-ss-fbink 2>/dev/null
 SS_DIR="/mnt/us/screensavers"
 
 PIDFILE="/tmp/custom_ss_daemon.pid"
@@ -24,8 +25,7 @@ log() {
 
 
 show_status() {
-    if ! chmod +x "$FBINK" >>"$LOG" 2>&1 ||
-        ! "$FBINK" -p -m -M -S 5 -B WHITE -C BLACK -w "$1" >>"$LOG" 2>&1
+    if ! "$FBINK" -p -m -M -S 5 -B WHITE -C BLACK -w "$1" >>"$LOG" 2>&1
     then
         log "ERROR: could not display status message"
         return 0
@@ -226,6 +226,15 @@ See logs."
 #
 
 case "${1:-toggle}" in
+    enable)
+        # Upstart calls this explicitly at boot; make it idempotent.
+        if daemon_is_running; then
+            log "Custom screensaver already enabled"
+        else
+            enable_custom_ss
+        fi
+        ;;
+
     disable)
         if daemon_is_running; then
             disable_custom_ss
