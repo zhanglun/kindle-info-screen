@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<!-- kindle-template: name=大字报极简 orientations=portrait,landscape -->
 <style>
   /* 大字报式极简 —— 瑞士网格 */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,6 +51,37 @@
   .news .src { font-size: 22px; color: #777; display: block; margin-bottom: 3px; }
   .foot { margin-top: auto; padding-top: 18px; display: flex; justify-content: space-between;
     font-size: 22px; color: #3c3c3c; }
+
+  /* 横版(1448x1072): 左列倒数日+五日预报, 右列待办+资讯 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .page { display: grid; grid-template-columns: 47% 1fr; grid-template-rows: auto 0px auto 1fr auto;
+            column-gap: 60px; padding: 44px 56px 30px; }
+    .page > :nth-child(1) { grid-area: 1 / 1 / 2 / 3; }
+    .page > :nth-child(2) { grid-area: 2 / 1 / 3 / 3; }
+    .page > :nth-child(3) { grid-area: 3 / 1 / 4 / 2; padding: 18px 0 14px; }
+    .page > :nth-child(4), .page > :nth-child(6) { display: none; }
+    .page > :nth-child(5) { grid-area: 4 / 1 / 5 / 2; padding: 14px 0; }
+    .page > :nth-child(7) { grid-area: 3 / 2 / 5 / 3; margin-top: 0; }
+    .page > :nth-child(8) { grid-area: 5 / 1 / 6 / 3; }
+    .top .l .d, .top .r .t { font-size: 104px; }
+    .top .l .m, .top .r .m { font-size: 24px; margin-top: 10px; }
+    .top .r .t sup { font-size: 44px; }
+    .count { padding-top: 16px; }
+    .crow .n { font-size: 27px; width: 170px; }
+    .crow .dt { font-size: 22px; width: 150px; }
+    .crow .v { font-size: 46px; }
+    .fc { padding: 12px 0; }
+    .fd .l { font-size: 21px; }
+    .fd .i { height: 40px; margin: 8px 0; }
+    .fd .i svg { width: 34px; height: 34px; }
+    .fd .c, .fd .t { font-size: 22px; }
+    .cols { gap: 44px; margin-top: 0; }
+    .sec { margin-bottom: 12px; }
+    .todo li { font-size: 25px; padding: 10px 0; }
+    .todo .box { width: 18px; height: 18px; margin-top: 7px; }
+    .news li { font-size: 22px; padding: 9px 0; }
+  }
 </style>
 </head>
 <body>

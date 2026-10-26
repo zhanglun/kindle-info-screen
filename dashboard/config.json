@@ -3,16 +3,15 @@
   "interval_min": 10,
   "port": 8787,
   "rss_sources": [],
-  "countdowns": [
-    {
-      "name": "元旦",
-      "date": "2027-01-01"
-    },
-    {
-      "name": "春节",
-      "date": "2027-02-06"
-    }
-  ],
-  "rss_count": 4,
-  "todo_file": "todo.txt"
+  "countdowns": [],
+  "rss_count": 6,
+  "todo_file": "todo.txt",
+  "kindle_host": "192.168.97.155",
+  "kindle_user": "root",
+  "kindle_ssh_port": 2222,
+  "kindle_update_cmd": "sh /mnt/us/extensions/onlinescreensaver/bin/update.sh",
+  "push_after_render": true,
+  "push_retry_min": 10,
+  "orientation": "portrait",
+  "template": "template.html"
 }

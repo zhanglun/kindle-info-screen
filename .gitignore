@@ -10,3 +10,17 @@ jailbreak-tools/kindle-screensavers/
 # 运行日志
 *.log
 __pycache__/
+
+# Python 虚拟环境
+.venv/
+
+# Rust 构建产物与打包出的 .app
+dashboard-rs/target/
+dashboard-rs/*.app
+
+# Windows 交叉编译产物
+dashboard-rs/dist-windows/
+dashboard-rs/*.zip
+
+# 本机/设备私钥，禁止提交
+/dashboard/kindle-fixes/dropbear_ed25519_host_key

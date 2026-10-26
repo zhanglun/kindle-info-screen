@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=相框 orientations=portrait,landscape -->
+<style>
+  /* 相框模式 —— Bing 每日壁纸满屏, 角落极简信息条
+     壁纸经抖动灰度化; 无壁纸时退化为纸底+日期 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #f4f1ea; color: #1c1c1c;
+    font-family: "Songti SC", "STSong", serif; overflow: hidden; }
+  .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    filter: contrast(1.05); }
+  .veil { position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(255,255,255,.82) 0%, rgba(255,255,255,.55) 17%, transparent 34%); }
+
+  .plate { position: absolute; left: 44px; right: 44px; bottom: 40px; }
+  .rule { border-top: 3px solid #1c1c1c; margin-bottom: 14px; }
+  .line1 { display: flex; align-items: baseline; gap: 18px; }
+  .date { font-size: 58px; font-weight: 900; letter-spacing: 2px; }
+  .wd { font-size: 26px; }
+  .lunar { font-size: 24px; color: #333; }
+  .credit { margin-left: auto; font-size: 18px; color: #555; }
+  .line2 { display: flex; align-items: baseline; gap: 24px; margin-top: 10px;
+    font-size: 25px; }
+  .temp { font-size: 44px; font-weight: 900; }
+  .next { margin-left: auto; font-size: 24px; color: #333; text-align: right; }
+  .next b { font-size: 30px; }
+
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .plate { left: 56px; right: 56px; bottom: 46px; }
+    .date { font-size: 64px; }
+    .line2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<img class="photo" id="photo" alt="">
+<div class="veil"></div>
+<div class="plate">
+  <div class="rule"></div>
+  <div class="line1">
+    <span class="date" id="date">--</span>
+    <span class="wd" id="wd"></span>
+    <span class="lunar" id="lunar"></span>
+    <span class="credit" id="credit"></span>
+  </div>
+  <div class="line2">
+    <span class="temp" id="temp"></span>
+    <span id="cond"></span>
+    <span class="next" id="next"></span>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+const now = new Date();
+document.getElementById("date").textContent =
+  now.getMonth() + 1 + "月" + now.getDate() + "日";
+document.getElementById("wd").textContent = DATA.weekday;
+document.getElementById("lunar").textContent =
+  [DATA.lunar && "农历 " + DATA.lunar, DATA.jieqi].filter(Boolean).join(" · ");
+if (DATA.wallpaper) {
+  document.getElementById("photo").src = DATA.wallpaper.file;
+  document.getElementById("credit").textContent = DATA.wallpaper.credit || "";
+} else {
+  document.getElementById("photo").remove();
+  document.querySelector(".veil").remove();
+}
+const w = DATA.weather;
+if (w) {
+  document.getElementById("temp").textContent = w.temp + "°";
+  document.getElementById("cond").textContent = w.code + " · " + w.city;
+} else {
+  document.getElementById("cond").textContent = DATA.weather_error || "";
+}
+const ev = (DATA.schedule || []).find(e => !e.all_day) || (DATA.schedule || [])[0];
+const cd = (DATA.countdowns || [])[0];
+document.getElementById("next").innerHTML =
+  (ev ? "接下来 <b>" + (ev.time || "全天") + "</b> " + ev.title : "") +
+  (ev && cd ? " · " : "") +
+  (cd ? "距" + cd.name + " <b>" + cd.days + "</b> 天" : "");
+</script>
+</body>
+</html>

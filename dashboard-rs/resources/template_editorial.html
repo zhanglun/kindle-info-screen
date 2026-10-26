@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=晨报编辑部 orientations=portrait,landscape -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1072px;height:1448px;background:#f5f3ed;color:#171717;font-family:"Songti SC","SimSun",serif;overflow:hidden}
+.page{position:relative;width:100%;height:100%;padding:48px 58px 34px;display:flex;flex-direction:column}.wallpaper{position:absolute;right:58px;top:150px;width:330px;height:440px;object-fit:cover;opacity:.12;filter:grayscale(1);pointer-events:none}.page>*:not(.wallpaper){position:relative}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:5px solid #171717;padding-bottom:12px}
+.name{font-size:54px;font-weight:900;letter-spacing:12px}.edition{font-size:22px;color:#444}
+.kicker{display:flex;justify-content:space-between;border-bottom:1px solid #171717;padding:12px 0;font-size:24px;color:#444}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:34px;flex:1;min-height:0;padding-top:24px}
+.left{border-right:1px solid #171717;padding-right:34px}.label{font-size:22px;letter-spacing:5px;border-bottom:3px solid #171717;padding-bottom:8px;margin-bottom:16px}
+.temp{font-size:190px;line-height:.85;font-weight:900;letter-spacing:-8px}.temp sup{font-size:54px;letter-spacing:0}
+.cond{font-size:38px;font-weight:700;margin-top:18px}.detail{font-size:24px;color:#444;line-height:1.8}
+.forecast{margin-top:28px}.frow{display:flex;align-items:baseline;border-bottom:1px solid #bdbdb7;padding:10px 0;font-size:25px}.frow b{width:100px}.frow span:nth-child(2){flex:1}.frow span:last-child{font-variant-numeric:tabular-nums}
+.right{display:flex;flex-direction:column;min-width:0}.section{margin-bottom:24px}.section h2{font-size:34px;border-bottom:3px solid #171717;padding-bottom:8px}.item{display:flex;gap:12px;border-bottom:1px solid #bdbdb7;padding:12px 0;font-size:27px;line-height:1.4}.box{width:22px;height:22px;border:3px solid #171717;flex:none;margin-top:7px}
+.quote{margin-top:auto;border-top:1px solid #171717;padding-top:18px}.quote p{font-size:36px;font-weight:700;line-height:1.8}.from{text-align:right;font-size:23px;color:#444;margin-top:12px}
+.foot{border-top:1px solid #171717;padding-top:10px;margin-top:18px;text-align:center;font-size:20px;color:#444}
+@media (min-width:1200px){
+ html,body{width:1448px;height:1072px}.page{padding:30px 48px 22px}.name{font-size:48px}.kicker{padding:8px 0;font-size:21px}
+ .grid{grid-template-columns:1fr 1fr 1fr;gap:30px;padding-top:18px}.left{border-right:1px solid #171717;padding-right:28px}.temp{font-size:142px}.cond{font-size:31px;margin-top:12px}.detail{font-size:20px}.forecast{margin-top:18px}.frow{font-size:21px;padding:7px 0}.frow b{width:76px}
+ .right{display:contents}.section{margin:0}.section h2{font-size:29px}.item{font-size:22px;padding:8px 0}.quote{grid-column:3;grid-row:1;border-top:0;border-left:1px solid #171717;padding:0 0 0 28px;margin:0}.quote p{font-size:30px}.foot{margin-top:10px;font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <img class="wallpaper" id="wallpaper" alt="">
+  <header class="mast"><span class="name">晨报编辑部</span><span class="edition" id="clock"></span></header>
+  <div class="kicker"><span id="date"></span><span id="sky"></span></div>
+  <main class="grid">
+    <section class="left"><div class="label">今日天气 / WEATHER</div><div class="temp"><span id="temp">--</span><sup>°C</sup></div><div class="cond" id="cond">暂无天气</div><div class="detail" id="detail"></div><div class="forecast" id="forecast"></div></section>
+    <section class="right"><div class="section"><h2>今日待办</h2><div id="todo"></div></div><div class="section"><h2>倒数日</h2><div id="countdowns"></div></div></section>
+    <section class="quote"><h2>编辑手记</h2><p id="quote">今天没有摘到一言。</p><div class="from" id="from"></div></section>
+  </main>
+  <footer class="foot">Kindle 信息屏 · 每十分钟更新 · <span id="credit"></span></footer>
+</div>
+<script>
+const D=/*__DATA__*/null,w=D.weather||{};if(D.wallpaper)document.getElementById("wallpaper").src=D.wallpaper.file;else document.getElementById("wallpaper").remove();document.getElementById("clock").textContent="更新于 "+D.time;document.getElementById("date").textContent=D.date+" · "+D.weekday;document.getElementById("sky").textContent=[D.lunar&&("农历 "+D.lunar),D.jieqi].filter(Boolean).join(" · ");
+if(D.wallpaper)document.getElementById("credit").textContent="Bing 每日一图";
+if(D.weather){temp.textContent=w.temp;cond.textContent=w.code+" · "+w.city;detail.textContent=["风速 "+w.wind+" km/h",w.aqi!=null&&("PM2.5 "+w.pm25+" · "+w.aqi_desc),"日出 "+w.sunrise+" · 日落 "+w.sunset].filter(Boolean).join(" · ");forecast.innerHTML=(w.days||[]).map(d=>`<div class="frow"><b>${d.label}</b><span>${d.code}</span><span>${d.hi}° / ${d.lo}°</span></div>`).join("")}
+const todos=D.todo||[];todo.innerHTML=(todos.length?todos:["今日无事,静心阅读"]).map(x=>`<div class="item"><i class="box"></i><span>${x}</span></div>`).join("");countdowns.innerHTML=(D.countdowns||[]).slice(0,4).map(x=>`<div class="item"><span>${x.name}</span><b>${x.days} 天</b></div>`).join("")||'<div class="item">暂无倒数日</div>';
+const y=D.yiyan;if(y&&y.text){quote.textContent="「"+y.text+"」";from.textContent="—— "+(y.who||y.from||"")}
+</script>
+</body>
+</html>

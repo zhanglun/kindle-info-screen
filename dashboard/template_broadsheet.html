@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<!-- kindle-template: name=报纸头版 orientations=portrait,landscape -->
 <style>
   /* 信息日报 —— 报纸头版风 */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -63,6 +64,62 @@
     border-top: 1px solid #c9c9c2; padding-top: 16px; }
   .folio { text-align: center; font-size: 21px; color: #444; padding-top: 14px;
     border-top: 1px solid #141414; margin-top: 16px; }
+
+  /* 横版(1448x1072): 报头横贯, 三栏版面 —— 天气主栏 / 倒数日框 / 待办与一言, 底部刊尾 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .page { display: grid; grid-template-columns: 36% 27% 1fr;
+            grid-template-rows: auto auto auto 1fr auto;
+            column-gap: 38px; padding: 28px 46px 22px; }
+    .page > :nth-child(1) { grid-area: 1 / 1 / 2 / 4; }
+    .page > :nth-child(2) { grid-area: 2 / 1 / 3 / 4; }
+    .page > :nth-child(3) { grid-area: 3 / 1 / 4 / 4; margin: 6px 0 0; }
+    .page > :nth-child(4) { grid-area: 4 / 1 / 5 / 2; padding: 12px 0 0; }
+    .page > :nth-child(5) { grid-area: 4 / 2 / 5 / 3; margin: 12px 0 0; }
+    .page > :nth-child(6) { grid-area: 4 / 3 / 5 / 4; margin: 12px 0 0; }
+    .page > :nth-child(7) { grid-area: 5 / 1 / 6 / 4; margin-top: 12px; }
+
+    .dateline { padding-bottom: 4px; }
+    .dateline .paper { font-size: 40px; letter-spacing: 8px; }
+    .dateline2 { padding-bottom: 6px; }
+
+    /* 天气主栏: 温度大字在上, 五日预报在下(原左右分栏改上下) */
+    .lead { flex-direction: column; padding: 12px 0 0; }
+    .lead-vline { display: none; }
+    .lead .temp { font-size: 108px; }
+    .lead .cond { font-size: 30px; margin-top: 6px; }
+    .lead .wind, .lead .aqi, .lead .sun { font-size: 20px; margin-top: 4px; }
+    .lead-side { margin-top: 10px; border-top: 1px solid #141414; padding-top: 2px; }
+    .frow { padding: 6px 0; }
+    .frow .d { width: 64px; font-size: 21px; }
+    .frow .ic svg { width: 26px; height: 26px; }
+    .frow .c { font-size: 21px; }
+    .frow .t { font-size: 21px; }
+
+    /* 倒数日框: 横排改竖排名条 */
+    .notice { flex-direction: column; align-items: stretch; gap: 0;
+              padding: 8px 16px; margin: 12px 0 0; }
+    .notice .item { font-size: 23px; padding: 9px 0;
+                    border-bottom: 1px solid #c9c9c2; align-items: baseline; gap: 6px; }
+    .notice .item:last-child { border-bottom: none; }
+    .notice .item b { font-size: 34px; padding: 0 4px; }
+    .notice .item span { margin-left: auto; font-size: 19px; }
+
+    /* 待办与一言: 两栏改上下堆叠 */
+    .cols { flex-direction: column; margin: 12px 0 0; }
+    .col + .col { border-left: none; margin-left: 0; padding-left: 0;
+                  border-top: 1px solid #141414; margin-top: 10px; padding-top: 2px; }
+    .colhead { padding-bottom: 4px; }
+    .colhead .t { font-size: 26px; letter-spacing: 5px; }
+    .todo li { font-size: 23px; padding: 7px 2px; }
+    .todo .box { width: 18px; height: 18px; margin-top: 5px; }
+    .quote { padding: 4px 2px 0; }
+    .qtext { font-size: 26px; line-height: 1.75; }
+    .qmark { font-size: 38px; }
+    .qfrom { margin-top: 10px; font-size: 20px; }
+    .qnote { display: none; }
+    .folio { padding-top: 8px; margin-top: 8px; font-size: 18px; }
+  }
 </style>
 </head>
 <body>
