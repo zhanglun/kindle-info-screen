@@ -3,6 +3,7 @@
 //! 子命令: `serve` 无托盘纯服务(Ctrl+C 退出), `once` 只渲染一次, 用于脚本/终端场景。
 // release 构建在 Windows 上不弹控制台黑窗(调试构建保留)
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+mod astro;
 mod config;
 mod extras;
 mod data;
@@ -23,10 +24,9 @@ const EMBEDDED_RESOURCES: &[(&str, &str)] = &[
     ("todo.txt", include_str!("../resources/todo.txt")),
     ("template_gallery.html", include_str!("../resources/template_gallery.html")),
     ("template_frame.html", include_str!("../resources/template_frame.html")),
-    ("template_night.html", include_str!("../resources/template_night.html")),
-    ("template_board.html", include_str!("../resources/template_board.html")),
     ("template_poem.html", include_str!("../resources/template_poem.html")),
-    ("template_sky.html", include_str!("../resources/template_sky.html")),
+    ("template_horizon.html", include_str!("../resources/template_horizon.html")),
+    ("template_morning.html", include_str!("../resources/template_morning.html")),
     ("calendar_table.json", include_str!("../resources/calendar_table.json")),
     ("idioms.json", include_str!("../resources/idioms.json")),
     ("webui.html", include_str!("../resources/webui.html")),
@@ -34,7 +34,7 @@ const EMBEDDED_RESOURCES: &[(&str, &str)] = &[
 
 /// 内置资源版本: 升级时刷新"程序文件"(模板/农历表/webui); config.json 与 todo.txt
 /// 是用户数据, 仅在缺失时创建, 永不覆盖。改过内置模板的话升级后需要重新套用。
-const RESOURCE_VERSION: &str = "34";
+const RESOURCE_VERSION: &str = "41";
 
 /// 数据目录: 环境变量 > .app 内嵌运行(macOS) > 可执行文件旁的 resources/
 fn base_dir() -> PathBuf {

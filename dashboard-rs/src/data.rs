@@ -273,6 +273,14 @@ fn compute_countdowns(today: NaiveDate, entries: &[crate::config::Countdown]) ->
     out
 }
 
+/// 城市经纬度(天气地理编码的本地缓存)
+fn geo_of(base: &Path, city: &str) -> Option<(f64, f64)> {
+    let cache: Value = std::fs::read_to_string(base.join("city_cache.json")).ok()
+        .and_then(|t| serde_json::from_str(&t).ok())?;
+    let hit = cache.get(city)?;
+    Some((hit["lat"].as_f64()?, hit["lon"].as_f64()?))
+}
+
 /// 抓全量数据并组装为模板 JSON(结构 dashboard.py build_data 的输出一一对应)
 pub fn build_data(base: &Path, cfg: &Config, cal: &Calendar) -> Value {
     let now = Local::now();
@@ -347,10 +355,25 @@ pub fn build_data(base: &Path, cfg: &Config, cal: &Calendar) -> Value {
     if !cfg.crypto.is_empty() {
         match crate::extras::fetch_crypto(&c, &cfg.crypto) {
             Ok(v) => data["crypto"] = v,
-            Err(e) => crate::log_line(base, &format!("行情获取失败: {e}")),
+            Err(e) => {
+                crate::log_line(base, &format!("行情获取失败: {e}"));
+                data["crypto_error"] = json!(format!("行情获取失败({e})"));
+            }
         }
     }
     data["idiom"] = crate::idioms::idiom_of_day(base);
+    // 天穹: 太阳/月亮的地平坐标(城市经纬度来自天气地理编码缓存)
+    if let Some((lat, lon)) = geo_of(base, &cfg.city) {
+        let now = Local::now().naive_local();
+        let (sun_alt, sun_az) = crate::astro::sun_alt_az(lat, lon, &now);
+        let (moon_alt, moon_az) = crate::astro::moon_alt_az(lat, lon, &now);
+        data["sky"] = json!({
+            "sun_alt": (sun_alt * 10.0).round() / 10.0,
+            "sun_az": (sun_az * 10.0).round() / 10.0,
+            "moon_alt": (moon_alt * 10.0).round() / 10.0,
+            "moon_az": (moon_az * 10.0).round() / 10.0,
+        });
+    }
     if cfg.frame_mode == "wallpaper" {
         let out_dir = base.join("out");
         let (w, h) = crate::render::dimensions(&cfg.orientation, &cfg.device);

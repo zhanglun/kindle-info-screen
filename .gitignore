@@ -18,3 +18,6 @@ dashboard-rs/*.zip
 
 # 本机/设备私钥，禁止提交
 /kindle-fixes/dropbear_ed25519_host_key
+
+# 渲染运行时输出(dashboard.png/渲染中间件/预览图)
+dashboard-rs/out/

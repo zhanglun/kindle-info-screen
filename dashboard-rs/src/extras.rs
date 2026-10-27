@@ -2,7 +2,7 @@
 //! 解析规则与容错行为与 Python 版(dashboard.py)一一对应。
 use crate::data::http_get;
 use crate::lunar::round_py;
-use chrono::{Datelike, Local, NaiveDate, NaiveDateTime, TimeDelta};
+use chrono::{Local, NaiveDate, NaiveDateTime, TimeDelta};
 use serde_json::{json, Value};
 use std::path::Path;
 use std::time::Duration;
@@ -263,31 +263,37 @@ const CRYPTO_NAMES: &[(&str, &str)] = &[
     ("litecoin", "LTC"), ("avalanche-2", "AVAX"), ("chainlink", "LINK"),
 ];
 
-/// 抓取指定币种的美元价与 24h 涨幅。走代理逻辑(coingecko 视网络环境可能需要)。
+/// 抓取指定币种的美元价与 1h/24h 涨幅。simple/price 不含 1h 字段, 走 markets 端点
+/// (price_change_percentage 请求后返回 *_in_currency 两个键)。走代理逻辑(coingecko 视网络环境可能需要)。
 pub fn fetch_crypto(c: &reqwest::blocking::Client, ids: &[String]) -> Result<Value, String> {
     if ids.is_empty() {
         return Ok(json!([]));
     }
     let url = format!(
-        "https://api.coingecko.com/api/v3/simple/price?ids={}&vs_currencies=usd&include_24hr_change=true",
+        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={}&price_change_percentage=1h,24h",
         ids.join(","));
     let body = http_get(c, &url, Duration::from_secs(15))?;
     let d: Value = serde_json::from_slice(&body).map_err(|e| e.to_string())?;
+    let arr = d.as_array().ok_or("行情返回格式异常")?;
     let mut out = Vec::new();
     for id in ids {
+        // markets 按市值排序返回, 按配置顺序取; 某币缺席只跳过该项
+        let Some(node) = arr.iter().find(|n| n["id"].as_str() == Some(id.as_str())) else {
+            continue;
+        };
         let sym = CRYPTO_NAMES.iter().find(|(i, _)| i == id)
             .map(|(_, s)| s.to_string())
             .unwrap_or_else(|| id.to_uppercase());
-        let node = &d[id.as_str()];
-        if node.is_null() || node["usd"].is_null() {
-            continue;
-        }
-        // 价格: >=1 保留整数位, <1 保留两位小数; 涨幅一位小数
-        let price = node["usd"].as_f64()
-            .map(|v| if v >= 1.0 { round_py(v) as f64 } else { (v * 100.0).round() / 100.0 });
-        let chg = node["usd_24h_change"].as_f64()
-            .map(|v| (v * 10.0).round() / 10.0);
-        out.push(json!({ "sym": sym, "price": price, "chg": chg }));
+        // 价格: >=100 取整, 其余保留两位小数(几美元的小币种取整会失真); 涨幅一位小数
+        let price = node["current_price"].as_f64()
+            .map(|v| if v >= 100.0 { round_py(v) as f64 } else { (v * 100.0).round() / 100.0 });
+        let pct = |key: &str| node[key].as_f64().map(|v| (v * 10.0).round() / 10.0);
+        out.push(json!({
+            "sym": sym,
+            "price": price,
+            "chg": pct("price_change_percentage_24h_in_currency"),
+            "chg1h": pct("price_change_percentage_1h_in_currency"),
+        }));
     }
     Ok(json!(out))
 }

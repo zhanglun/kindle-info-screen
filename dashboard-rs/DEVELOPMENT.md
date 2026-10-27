@@ -77,17 +77,15 @@ Web 页 `/api/templates` 与渲染即按此识别。两点注意：
 2. 模板是纯 HTML+JS，数据从注入的 `__DATA__` JSON 读，不经过任何服务端模板引擎；
    无元数据头的文件以文件名兜底且仅竖版。
 
-当前启用六套「夜画展签」系列:白底纸感的「画框」为装饰位,其余五套为墨色底
-夜画(白名单见 `render.rs::ALLOWED_TEMPLATES`),全部支持横竖版与旋转输出:
+当前启用五套(白名单见 `render.rs::ALLOWED_TEMPLATES`):
 
 | 模板 | 底色 | 内容 |
 |---|---|---|
-| 画框 `template_gallery.html` | 白 | Bing 壁纸/月相全幅 + 白纸展签(时钟/日期/天气) |
+| 画框 `template_gallery.html` | 白 | 水墨月夜(月随真实相位) / Bing 壁纸 + 白纸展签 |
+| 晨报 `template_morning.html` | 白 | 报纸版式: 天气头条(线稿图标+五日温度带) + 行情报价栏(1h 涨跌) + 日程/待办/倒数日分栏 + 热榜 + 报尾一言 |
 | 相框夜画 `template_frame.html` | 黑 | 大月相 + 星空 + 地平线, 展签(时钟/天气/倒数日/一言) |
-| 夜钟 `template_night.html` | 黑 | 巨时钟 + 日期农历 + 天气一行 + 一言 |
-| 告示 `template_board.html` | 黑 | 待办大字编号陈列 + 倒数日大数字 |
 | 诗笺 `template_poem.html` | 黑 | 一言宋体竖排 + 成语侧注 + 月相 |
-| 星图 `template_sky.html` | 黑 | 行情(CoinGecko, 最多 5 币) + 天气 + 倒数日 + 一言成语 |
+| 天穹 `template_horizon.html` | 昼夜灰阶 | 太阳/月亮按真实天文位置摆放(Meeus 低精度算法, 城市经纬度取自天气缓存), 远山 + 白纸展签(时钟/天气/日出日落) |
 
 行情币种在 `config.json` 的 `crypto` 字段配置(CoinGecko id,最多 5 个);
 成语来自内置 `idioms.json`(48 条精选,按日轮换,离线可用)。

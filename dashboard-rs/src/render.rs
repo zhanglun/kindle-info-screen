@@ -67,10 +67,10 @@ pub struct TemplateInfo {
 
 /// 实际启用的模板白名单(list_templates 与 render_once 以此为准);新模板两处都要记得加
 pub const ALLOWED_TEMPLATES: &[&str] = &[
-    // 画框(白底装饰) / 月相 / 夜钟 —— 夜画系列
-    "template_gallery.html", "template_frame.html", "template_night.html",
-    // 告示(夜间公告牌) / 诗笺 / 星图(夜览仪表)
-    "template_board.html", "template_poem.html", "template_sky.html",
+    // 画框(白底水墨月夜) / 相框夜画(黑底月相) / 诗笺(黑底竖排一言)
+    "template_gallery.html", "template_frame.html", "template_poem.html",
+    // 天穹(日月经天) / 晨报(白底报纸)
+    "template_horizon.html", "template_morning.html",
 ];
 
 /// 扫描数据目录下的 template*.html, 解析头部元数据; 无元数据的文件以文件名兜底, 仅竖版

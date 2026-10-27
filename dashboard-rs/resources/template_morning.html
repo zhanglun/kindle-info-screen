@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=晨报 orientations=portrait,landscape -->
+<style>
+  /* 晨报 —— 一张坐下来读的报纸。报名压角, 天气做头条(带线稿图标),
+     行情进报价栏, 日程待办倒数日分栏, 热榜收底。白纸墨字, 全靠字排, 不用图。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #fdfdfb; color: #1a1a1a;
+    font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .num { font-variant-numeric: tabular-nums; }
+  .page { width: 100%; height: 100%; padding: 44px 76px 38px;
+    display: flex; flex-direction: column; }
+
+  /* 报头: 报名压左, 时刻与期号压右 */
+  .mast { display: flex; justify-content: space-between; align-items: flex-end;
+    border-top: 1px solid #1a1a1a; padding-top: 14px; }
+  .mast-title { display: flex; gap: .4em; font-size: 96px; font-weight: 900; line-height: 1; }
+  .mast-side { text-align: right; padding-bottom: 6px; }
+  .mast-time { font-size: 46px; line-height: 1; font-weight: 400; }
+  .mast-issue { font-size: 19px; color: #5b5a54; margin-top: 10px; letter-spacing: 3px; }
+  .dateline { font-size: 22px; color: #4a4a46; letter-spacing: 2px; margin-top: 14px; }
+  .mast-rule { border-top: 3px solid #1a1a1a; position: relative; margin-top: 12px; }
+  .mast-rule::after { content: ""; position: absolute; left: 0; right: 0; top: 5px;
+    border-top: 1px solid #1a1a1a; }
+
+  /* 天气头条 */
+  .lead { display: grid; grid-template-columns: 5fr 6fr; gap: 44px; margin-top: 30px; }
+  .now .city { font-size: 27px; font-weight: 700; }
+  .now .temp { font-size: 128px; line-height: 1; font-weight: 400; letter-spacing: -2px; }
+  .now .temp small { font-size: 40px; letter-spacing: 0; }
+  .nowline { display: flex; align-items: center; gap: 26px; margin: 8px 0 6px -6px; }
+  .wic { stroke: #1a1a1a; fill: none; stroke-width: 1.5;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .nowline .wic { width: 76px; height: 76px; flex: none; }
+  .now .sub { font-size: 22px; color: #4a4a46; line-height: 1.7; }
+  .now .aqi { display: inline-block; border: 1.5px solid #1a1a1a;
+    padding: 1px 12px; margin-left: 12px; color: #1a1a1a; }
+  .days { display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  .day { display: flex; align-items: center; gap: 12px; }
+  .day .dl { width: 68px; font-size: 22px; }
+  .day .di { width: 27px; flex: none; }
+  .day .di .wic { width: 25px; height: 25px; display: block; }
+  .day .dc { flex: 1; font-size: 20px; color: #4a4a46; }
+  .day .dlo { width: 44px; text-align: right; font-size: 21px; color: #4a4a46; }
+  .day .track { flex: 1.6; position: relative; height: 7px; align-self: center;
+    background: #e6e3da; }
+  .day .bar { position: absolute; top: 0; bottom: 0; background: #1a1a1a; }
+  .day .dhi { width: 44px; font-size: 21px; font-weight: 700; }
+  .day.today .dl, .day.today .dlo { font-weight: 700; color: #1a1a1a; }
+
+  /* 行情报价栏: 只有单位脚注, 不设栏题 */
+  .mkt { margin-top: 30px; border-top: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;
+    padding: 12px 4px 16px; }
+  .unit { text-align: right; font-size: 17px; color: #5b5a54;
+    letter-spacing: 1px; margin-bottom: 12px; }
+  .mkt-row { display: flex; justify-content: space-between; }
+  .coin { text-align: center; min-width: 120px; }
+  .coin .cs { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: #4a4a46; }
+  .coin .cp { font-size: 32px; line-height: 1.3; }
+  .coin .cc { font-size: 20px; color: #4a4a46; }
+
+  /* 分栏: 日程 / 待办 / 倒数日, 数据格式自解释, 不设栏题 */
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
+    gap: 0 36px; margin-top: 28px; min-height: 0; overflow: hidden; }
+  .col { min-width: 0; }
+  .col + .col { border-left: 1px solid #c9c6bd; padding-left: 36px; }
+  .ev { display: flex; gap: 16px; padding: 7.5px 0; }
+  .ev .et { width: 74px; flex: none; font-size: 21px; }
+  .ev .et.all { font-size: 17px; color: #4a4a46; padding-top: 4px; }
+  .ev .en { font-size: 22px; line-height: 1.45; }
+  .td { display: flex; gap: 12px; padding: 7.5px 0; }
+  .td .ti { flex: none; font-size: 18px; color: #5b5a54; padding-top: 4px; }
+  .td .tx { font-size: 22px; line-height: 1.45;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cd { display: flex; justify-content: space-between; align-items: baseline;
+    padding: 9px 0; }
+  .cd .cn { font-size: 22px; }
+  .cd .cd2 { font-size: 17px; color: #5b5a54; margin-left: 8px; }
+  .cd .rest { font-size: 21px; color: #4a4a46; }
+  .cd .rest b { font-size: 31px; color: #1a1a1a; font-weight: 700; margin: 0 2px; }
+  .rest-flag { display: inline-block; border: 1px solid #1a1a1a; font-size: 15px;
+    line-height: 1; padding: 2px 5px 3px; margin-right: 7px; vertical-align: 3px; }
+  .empty { padding-top: 14px; font-size: 20px; color: #5b5a54; letter-spacing: 1px; }
+
+  /* 热榜: 源名即栏头, 一条淡线隔开分栏区 */
+  .hot { margin-top: 26px; margin-bottom: 18px; border-top: 1px solid #c9c6bd;
+    padding-top: 16px; }
+  .hot-grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); }
+  .src { padding: 0 22px; min-width: 0; }
+  .src:first-child { padding-left: 0; }
+  .src:last-child { padding-right: 0; }
+  .src + .src { border-left: 1px solid #c9c6bd; }
+  .src .sn { font-size: 18px; font-weight: 700; letter-spacing: 3px; margin-bottom: 6px; }
+  .src .it { display: flex; gap: 10px; padding: 3.5px 0; }
+  .src .ii { flex: none; font-size: 17px; color: #5b5a54; padding-top: 3px; }
+  .src .it div { font-size: 19px; line-height: 1.5;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* 报尾一言: 页内富余的空白都收在这里 */
+  .tail { margin-top: auto; border-top: 1px solid #1a1a1a; padding-top: 16px;
+    text-align: center; font-size: 20px; letter-spacing: 1px; }
+  .tail .who { font-size: 18px; color: #5b5a54; margin-left: 12px; letter-spacing: 2px; }
+
+  /* 横版(1448x1072): 版式同构, 报头压扁, 条块收紧, 条数由 JS 按朝向裁剪 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .page { padding: 32px 84px 30px; }
+    .mast { padding-top: 10px; }
+    .mast-title { font-size: 56px; }
+    .mast-side { padding-bottom: 3px; }
+    .mast-time { font-size: 33px; }
+    .mast-issue { font-size: 17px; margin-top: 6px; }
+    .dateline { font-size: 20px; margin-top: 10px; }
+    .mast-rule { margin-top: 8px; }
+    .lead { margin-top: 18px; gap: 56px; grid-template-columns: 4fr 7fr; }
+    .now .city { font-size: 24px; }
+    .now .temp { font-size: 96px; }
+    .now .temp small { font-size: 32px; }
+    .nowline { gap: 22px; margin: 4px 0 2px -5px; }
+    .nowline .wic { width: 60px; height: 60px; }
+    .now .sub { font-size: 20px; line-height: 1.65; }
+    .days { gap: 9px; }
+    .day .dl { width: 58px; font-size: 20px; }
+    .day .di { width: 25px; }
+    .day .di .wic { width: 23px; height: 23px; }
+    .day .dc { font-size: 18px; }
+    .day .dlo, .day .dhi { font-size: 19px; width: 42px; }
+    .mkt { margin-top: 20px; padding: 10px 4px 12px; }
+    .unit { margin-bottom: 8px; }
+    .coin .cp { font-size: 26px; }
+    .coin .cc { font-size: 18px; }
+    .cols { margin-top: 20px; gap: 0 30px; }
+    .col + .col { padding-left: 30px; }
+    .ev, .td { padding: 4.5px 0; }
+    .ev .en, .td .tx, .cd .cn { font-size: 20px; }
+    .ev .et { font-size: 19px; }
+    .cd { padding: 5.5px 0; }
+    .cd .rest b { font-size: 26px; }
+    .hot { margin-top: 18px; margin-bottom: 16px; padding-top: 12px; }
+    .src .it { padding: 2.5px 0; }
+    .src .it div { font-size: 18px; }
+    .tail { padding-top: 12px; font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="mast">
+      <h1 class="mast-title"><span>晨</span><span>报</span></h1>
+      <div class="mast-side">
+        <div class="mast-time num" id="mtime">--:--</div>
+        <div class="mast-issue" id="issue"></div>
+      </div>
+    </div>
+    <div class="dateline" id="dateline"></div>
+    <div class="mast-rule"></div>
+  </header>
+
+  <section class="lead" id="lead" style="display:none">
+    <div class="now" id="now"></div>
+    <div class="days num" id="days"></div>
+  </section>
+
+  <section class="mkt" id="mkt" style="display:none">
+    <div class="unit num" id="unit">单位 USD · 涨跌为近一小时</div>
+    <div class="mkt-row num" id="mktRow"></div>
+  </section>
+
+  <section class="cols">
+    <div class="col" id="colSched">
+      <div id="schedList"></div>
+    </div>
+    <div class="col" id="colTodo">
+      <div id="todoList"></div>
+    </div>
+    <div class="col" id="colCd" style="display:none">
+      <div class="num" id="cdList"></div>
+    </div>
+  </section>
+
+  <section class="hot" id="hot" style="display:none">
+    <div class="hot-grid" id="hotGrid"></div>
+  </section>
+
+  <footer class="tail" id="tail" style="display:none"></footer>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+const $ = id => document.getElementById(id);
+// 横版高度只有竖版四分之三, 各列表按朝向少放一条
+const LAND = document.documentElement.dataset.orientation === "landscape";
+
+$("mtime").textContent = DATA.time;
+
+// 期号 = 当年第几天, 报头的诚实计数
+{
+  const m = (DATA.date || "").match(/(\d+)月(\d+)日/);
+  if (m) {
+    const d = new Date(DATA.year, m[1] - 1, m[2]);
+    const n = Math.round((d - new Date(DATA.year, 0, 1)) / 864e5) + 1;
+    $("issue").textContent = "第 " + n + " 期";
+  }
+}
+$("dateline").textContent =
+  [DATA.date + " " + DATA.weekday, DATA.lunar ? "农历" + DATA.lunar : "",
+   DATA.jieqi || ""].filter(Boolean).join(" · ");
+
+// 天气线稿图标: 太阳/云/雨/雪/雷/雾, 一套笔画, 按 WMO 代码取
+function wicon(wc) {
+  const CLOUD = '<path fill="#fdfdfb" d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+  const CLOUD_HI = '<path fill="#fdfdfb" transform="translate(1.2 -1.6) scale(.88)" d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+  let b;
+  if (wc === 0) {
+    b = '<circle cx="12" cy="12" r="4.6"/>' +
+        '<path d="M12 2.8V5M12 19v2.2M2.8 12H5M19 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>';
+  } else if (wc === 1 || wc === 2) {
+    b = '<circle cx="8" cy="6.8" r="2.9"/>' +
+        '<path stroke-width="1.2" d="M8 2.4v1.4M2.4 6.8h1.4M4 2.8l1 1M12 2.8l-1 1"/>' +
+        '<path fill="#fdfdfb" transform="translate(2.8 2) scale(.82)" d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+  } else if (wc === 3) {
+    b = '<path opacity=".45" transform="translate(4.8 -2.6) scale(.6)" d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>' +
+        '<path fill="#fdfdfb" transform="translate(-.8 1.6) scale(.92)" d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+  } else if (wc === 45 || wc === 48) {
+    b = CLOUD_HI + '<path d="M5.2 18.2h13.2M7.2 20.8h9.2"/>';
+  } else if (wc === 51 || wc === 53 || wc === 55 || wc === 56 || wc === 57) {
+    b = CLOUD_HI + '<path d="M9.2 18v1.8M13.2 18v1.8M16.8 18v1.8"/>';
+  } else if (wc === 71 || wc === 73 || wc === 75 || wc === 77 || wc === 85 || wc === 86) {
+    b = CLOUD_HI +
+        '<circle cx="8.9" cy="18.7" r="1" fill="#1a1a1a" stroke="none"/>' +
+        '<circle cx="12.7" cy="20.1" r="1" fill="#1a1a1a" stroke="none"/>' +
+        '<circle cx="16.1" cy="18.7" r="1" fill="#1a1a1a" stroke="none"/>';
+  } else if (wc === 95 || wc === 96 || wc === 99) {
+    b = CLOUD_HI + '<path d="M13 16.4l-2.4 3.5h3l-2.2 3.3"/>';
+  } else if (wc === 61 || wc === 63 || wc === 65 || wc === 66 || wc === 67 ||
+             wc === 80 || wc === 81 || wc === 82) {
+    b = CLOUD_HI + '<path d="M8.7 17.8l-1 2.6M12.7 17.8l-1 2.6M16.7 17.8l-1 2.6"/>';
+  } else {
+    b = CLOUD;
+  }
+  return '<svg class="wic" viewBox="0 0 24 24">' + b + "</svg>";
+}
+
+// 天气头条
+const w = DATA.weather;
+if (w || DATA.weather_error) {
+  $("lead").style.display = "";
+}
+if (w) {
+  const sub = ["最高 " + w.days[0].hi + "° · 最低 " + w.days[0].lo + "°",
+               "风 " + w.wind + " km/h"];
+  if (w.sunrise) sub.push("日出 " + w.sunrise + " · 日落 " + w.sunset);
+  const aqi = w.aqi != null ? '<span class="aqi">空气' + w.aqi_desc + " " + w.aqi + "</span>" : "";
+  $("now").innerHTML =
+    '<div class="city">' + w.city + " · " + w.code + aqi + "</div>" +
+    '<div class="nowline"><span class="temp num">' + w.temp + "<small>°C</small></span>" +
+    wicon(w.wc) + "</div>" +
+    '<div class="sub num">' + sub.join("<br>") + "</div>";
+
+  const lo = Math.min(...w.days.map(d => d.lo));
+  const hi = Math.max(...w.days.map(d => d.hi));
+  const span = Math.max(1, hi - lo);
+  $("days").innerHTML = w.days.map((d, i) => {
+    const l = (d.lo - lo) / span * 100;
+    const r = (d.hi - hi === 0) ? 100 : (d.hi - lo) / span * 100;
+    return '<div class="day' + (i === 0 ? " today" : "") + '">' +
+      '<span class="dl">' + d.label + '</span>' +
+      '<span class="di">' + wicon(d.wc) + "</span>" +
+      '<span class="dc">' + d.code + "</span>" +
+      '<span class="dlo">' + d.lo + "°</span>" +
+      '<span class="track"><span class="bar" style="left:' + l.toFixed(1) + "%;width:" +
+      Math.max(1.5, r - l).toFixed(1) + '%"></span></span>' +
+      '<span class="dhi">' + d.hi + "°</span></div>";
+  }).join("");
+} else if (DATA.weather_error) {
+  $("now").innerHTML = '<div class="city">' + DATA.weather_error + "</div>";
+}
+
+// 行情报价栏
+const coins = DATA.crypto || [];
+if (coins.length) {
+  $("mkt").style.display = "";
+  const fmt = v => v >= 100 ? v.toLocaleString("en-US")
+                            : String(Math.round(v * 100) / 100);
+  const pct = v => v == null ? "—" : (v > 0 ? "+" : "") + v.toFixed(1) + "%";
+  $("mktRow").innerHTML = coins.map(c =>
+    '<div class="coin"><div class="cs">' + c.sym + "</div>" +
+    '<div class="cp">' + (c.price == null ? "—" : fmt(c.price)) + "</div>" +
+    '<div class="cc">' + pct(c.chg1h) + "</div></div>").join("");
+} else if (DATA.crypto_error) {
+  $("mkt").style.display = "";
+  $("unit").style.display = "none";
+  $("mktRow").innerHTML = '<div class="empty">' + DATA.crypto_error + "</div>";
+}
+
+// 日程 / 待办 / 倒数日
+const evs = (DATA.schedule || []).slice(0, LAND ? 4 : 5);
+$("schedList").innerHTML = evs.length ? evs.map(e =>
+  '<div class="ev"><span class="et num' + (e.all_day ? " all" : "") + '">' +
+  (e.all_day ? "全天" : e.time) + '</span><span class="en">' + e.title + "</span></div>"
+).join("") : '<div class="empty">今日无日程。</div>';
+
+const todos = (DATA.todo || []).slice(0, LAND ? 5 : 6);
+$("todoList").innerHTML = todos.length ? todos.map((t, i) =>
+  '<div class="td"><span class="ti num">' + (i + 1) + '.</span><span class="tx">' +
+  t + "</span></div>").join("")
+  : '<div class="empty">清单已清空。</div>';
+
+const cds = (DATA.countdowns || []).slice(0, LAND ? 4 : 5);
+if (cds.length) {
+  $("colCd").style.display = "";
+  $("cdList").innerHTML = cds.map(c =>
+    '<div class="cd"><span><span class="cn">' +
+    (c.holiday ? '<span class="rest-flag">休</span>' : "") + c.name + "</span>" +
+    '<span class="cd2 num">' + c.date + "</span></span>" +
+    '<span class="rest"><b>' + c.days + "</b>天</span></div>").join("");
+}
+
+// 热榜: 源名(微博/B站/GitHub)即栏头; 空源(如微博接口拿不到数据)整栏隐藏
+const hot = (DATA.hotlist || []).filter(s => (s.items || []).length);
+if (hot.length) {
+  $("hot").style.display = "";
+  $("hotGrid").innerHTML = hot.map(s =>
+    '<div class="src"><div class="sn">' + s.src + "</div>" +
+    s.items.slice(0, LAND ? 4 : 5).map((it, i) =>
+      '<div class="it"><span class="ii num">' + (i + 1) + "</span><div>" +
+      it.title + "</div></div>").join("") + "</div>").join("");
+}
+
+// 报尾一言
+const y = DATA.yiyan;
+if (y && y.text) {
+  $("tail").style.display = "";
+  $("tail").innerHTML = "「" + y.text + "」" +
+    '<span class="who">—— ' + (y.who || y.from || "佚名") + "</span>";
+}
+</script>
+</body>
+</html>

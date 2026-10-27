@@ -24,9 +24,8 @@
   .label .row .wx { font-weight: 600; }
   .rule { height: 0; border-top: 1px solid #161616; margin: 20px 0 16px; }
 
-  .moonart { flex: 1; display: flex; align-items: center; justify-content: center;
-    background: #fdfdfb; }
-  .moonart svg { width: 300px; height: 300px; opacity: .92; }
+  .moonart { flex: 1; background: #fdfdfb; }
+  .moonart svg { width: 100%; height: 100%; display: block; }
 
   /* 横版: 画幅 70%, 展签一行横排 */
   @media (min-width: 1200px) {
@@ -68,21 +67,36 @@ if (DATA.wallpaper) {
   art.src = DATA.wallpaper.file;
   art.style.display = "block";
 } else {
-  const o = 'fill="none" stroke="#161616" stroke-width="1.2"', f = 'fill="#161616"';
+  // 水墨月夜: 月偏右上(相位形状), 月面浅斑, 淡星数点, 底部远山剪影
   const p = {
-    "新月": `<circle cx="12" cy="12" r="9" ${o}/>`,
-    "娥眉月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" ${f}/>`,
-    "上弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 Z" ${f}/>`,
-    "盈凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" ${f}/>`,
-    "满月": `<circle cx="12" cy="12" r="9" ${o}/><circle cx="12" cy="12" r="9" ${f}/>`,
-    "亏凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" ${f}/>`,
-    "下弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 Z" ${f}/>`,
-    "残月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ${f}/>`
+    "新月": '<circle cx="12" cy="12" r="8.6" fill="none" stroke="#3a3a36" stroke-width="0.55"/>',
+    "娥眉月": '<path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>',
+    "上弦月": '<path d="M12,3 A9,9 0 0 1 12,21 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>',
+    "盈凸月": '<path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>',
+    "满月": '<circle cx="12" cy="12" r="9" fill="#dedcd2"/>',
+    "亏凸月": '<path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>',
+    "下弦月": '<path d="M12,3 A9,9 0 0 0 12,21 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>',
+    "残月": '<path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" fill="#dedcd2" stroke="#3a3a36" stroke-width="0.35"/>'
   };
   const name = DATA.moon ? DATA.moon.name : "满月";
+  // 满月/凸月带月面浅斑, 细牙月不带
+  const craters = name === "满月" || name.includes("凸")
+    ? '<ellipse cx="9.2" cy="9.5" rx="1.7" ry="1.3" fill="#cdcbbf"/>' +
+      '<ellipse cx="14.5" cy="13.5" rx="1.2" ry="1" fill="#cdcbbf"/>' +
+      '<ellipse cx="10.5" cy="15" rx="0.9" ry="0.7" fill="#cdcbbf"/>'
+    : "";
+  const starsDots = [[18,12],[30,6],[46,18],[62,9],[80,15],[12,30],[70,26],[88,28],[38,32]]
+    .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${0.9 + (i % 3) * 0.4}" fill="#a8a6a0" opacity="${0.4 + (i % 3) * 0.15}"/>`).join("");
+  // 月心: 竖版偏右上 (画幅 1072x1100), 横版媒体查询内由 viewBox 保持构图
   const m = document.getElementById("moonart");
-  m.style.display = "flex";
-  m.innerHTML = '<svg viewBox="0 0 24 24">' + (p[name] || p["满月"]) + '</svg>';
+  m.style.display = "block";
+  m.innerHTML =
+    '<svg viewBox="0 0 1072 1100" preserveAspectRatio="xMidYMid slice">' +
+    starsDots +
+    '<g transform="translate(720 300) scale(17)">' + (p[name] || p["满月"]) + craters + '</g>' +
+    '<path d="M0 930 L150 850 L300 915 L470 830 L640 900 L800 845 L950 905 L1072 860 L1072 1100 L0 1100 Z" fill="#26261f"/>' +
+    '<path d="M0 990 L180 935 L360 980 L560 925 L760 975 L940 930 L1072 965 L1072 1100 L0 1100 Z" fill="#3c3c34"/>' +
+    '</svg>';
 }
 </script>
 </body>

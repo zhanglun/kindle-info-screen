@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=天穹 orientations=portrait,landscape -->
+<style>
+  /* 天穹 —— 日月经天。天空中的太阳与月亮按真实天文位置摆放,
+     每次刷新都是此刻的天。天空灰阶随昼夜变化, 夜里出星;
+     地平线下是远山与白纸展签。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #fdfdfb; color: #161616;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .page { width: 100%; height: 100%; display: flex; flex-direction: column; }
+  .skywrap { height: 76%; position: relative; background: #f2f1ec; }
+  .skywrap svg { width: 100%; height: 100%; display: block; }
+
+  .label { flex: 1; padding: 26px 96px 0; display: flex; flex-direction: column;
+    justify-content: center; }
+  .label .clock { font-size: 84px; font-weight: 200; line-height: 1;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .label .row { display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 20px; color: #444; }
+  .label .row + .row { margin-top: 8px; color: #6b6b6b; font-size: 19px; }
+  .label .row .wx { font-weight: 600; font-size: 22px; color: #161616; }
+  .rule { height: 0; border-top: 1px solid #161616; margin: 18px 0 14px; }
+
+  /* 横版: 天空 70%, 展签一行 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .skywrap { height: 70%; }
+    .label { padding: 18px 96px 0; }
+    .label .clock { font-size: 64px; }
+    .label .row { margin-top: 10px; }
+    .rule { margin: 12px 0 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="skywrap"><svg id="sky" viewBox="0 0 1072 1100" preserveAspectRatio="xMidYMid slice"></svg></div>
+  <div class="label">
+    <div class="clock" id="clock">--:--</div>
+    <div class="rule"></div>
+    <div class="row"><span class="wx" id="wx"></span></div>
+    <div class="row"><span id="datecn"></span></div>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+document.getElementById("clock").textContent = DATA.time;
+document.getElementById("datecn").textContent =
+  [DATA.date, DATA.weekday, DATA.lunar ? "农历 " + DATA.lunar : "",
+   DATA.jieqi || ""].filter(Boolean).join(" · ");
+const w = DATA.weather;
+document.getElementById("wx").textContent = w
+  ? w.code + " " + w.temp + "°C · " + w.city +
+    (w.sunrise ? " · 日出 " + w.sunrise + " · 日落 " + w.sunset : "")
+  : (DATA.weather_error || "");
+
+// ---- 天穹绘制 ----
+const W = 1072, HORIZON = 980;
+const sky = DATA.sky || {};
+const sunAlt = sky.sun_alt, sunAz = sky.sun_az;
+const moonAlt = sky.moon_alt, moonAz = sky.moon_az;
+
+// 方位(自南, 西正): 东 -90 → 左, 西 +90 → 右; 高度 0°=地平线, 62°+≈顶
+function skyXY(alt, az) {
+  const k = Math.max(-0.42, Math.min(az / 180, 0.42));
+  const t = Math.max(0, Math.min(alt / 62, 1));
+  return { x: W * (0.5 + k), y: HORIZON - 50 - t * (HORIZON - 210) };
+}
+
+// 天空色随太阳高度: 白天纸白 / 晨昏暖灰 / 夜墨
+let skyFill = "#f2f1ec";
+if (sunAlt != null) {
+  if (sunAlt <= -8) skyFill = "#111116";
+  else if (sunAlt <= -2) skyFill = "#63615c";
+  else if (sunAlt <= 4) skyFill = "#c9c6ba";
+  else if (sunAlt <= 10) skyFill = "#eae8df";
+}
+let layers = '<rect width="' + W + '" height="1100" fill="' + skyFill + '"/>';
+
+const night = sunAlt != null && sunAlt < -6;
+const dusk = sunAlt != null && sunAlt >= -8 && sunAlt <= 6;
+
+// 夜/晨昏: 星星
+if (night || dusk) {
+  const stars = [[8,10],[16,26],[25,8],[34,40],[43,18],[52,52],[61,12],[70,34],
+                 [79,6],[88,44],[95,22],[30,60],[65,66],[90,70]]
+    .map(([x, y], i) => '<circle cx="' + (x / 100 * W) + '" cy="' + (y / 100 * 620) +
+      '" r="' + (1.6 + (i % 3) * 1.1) + '" fill="' + (night ? "#f2f2ef" : "#fdfdfb") +
+      '" opacity="' + (night ? 0.8 : 0.5) + '"/>').join("");
+  layers += stars;
+}
+
+// 太阳: 白天在地平线上
+if (sunAlt != null && sunAlt > 0) {
+  const p = skyXY(sunAlt, sunAz);
+  layers += '<circle cx="' + p.x + '" cy="' + p.y + '" r="46" fill="#d9d5c8"/>' +
+            '<circle cx="' + p.x + '" cy="' + p.y + '" r="58" fill="none" stroke="#c9c5b6" stroke-width="2"/>';
+}
+
+// 月亮: 升起且太阳落山(或晨昏)时, 按真实月相画
+function moonPath(name){
+  const o = 'fill="#e8e6df"', d = 'fill="#0d0d10" stroke="#e8e6df" stroke-width="0.5"';
+  const p = {
+    "新月": '<circle cx="12" cy="12" r="8.5" ' + d + '/>',
+    "娥眉月": '<path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" ' + o + '/>',
+    "上弦月": '<path d="M12,3 A9,9 0 0 1 12,21 Z" ' + o + '/>',
+    "盈凸月": '<path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" ' + o + '/>',
+    "满月": '<circle cx="12" cy="12" r="9" ' + o + '/>',
+    "亏凸月": '<path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" ' + o + '/>',
+    "下弦月": '<path d="M12,3 A9,9 0 0 0 12,21 Z" ' + o + '/>',
+    "残月": '<path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ' + o + '/>'
+  };
+  return p[name] || p["满月"];
+}
+if (moonAlt != null && moonAlt > 0 && (night || dusk || (sunAlt != null && sunAlt < 12))) {
+  const p = skyXY(moonAlt, moonAz);
+  const name = DATA.moon ? DATA.moon.name : "满月";
+  layers += '<g transform="translate(' + p.x + ' ' + p.y + ') scale(6.2)">' +
+            moonPath(name) + '</g>';
+}
+
+// 远山剪影(地平线)
+layers += '<path d="M0 930 L150 850 L300 915 L470 830 L640 900 L800 845 L950 905 L1072 860 L1072 1100 L0 1100 Z" fill="#26261f"/>' +
+          '<path d="M0 990 L180 935 L360 980 L560 925 L760 975 L940 930 L1072 965 L1072 1100 L0 1100 Z" fill="#3c3c34"/>';
+
+document.getElementById("sky").innerHTML = layers;
+</script>
+</body>
+</html>
