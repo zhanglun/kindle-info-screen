@@ -5,7 +5,8 @@ use crate::lunar::{jieqi_display, moon_phase, round_py, Calendar};
 use chrono::{Datelike, Local, NaiveDate};
 use serde_json::{json, Value};
 use std::path::Path;
-use std::time::Duration;
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 const WEEKDAY: [&str; 7] = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
@@ -48,6 +49,15 @@ fn system_proxy() -> Option<String> {
 #[cfg(not(target_os = "macos"))]
 fn system_proxy() -> Option<String> {
     None // Windows: 直接连接或设 HTTPS_PROXY 环境变量(reqwest 默认读取)
+}
+
+/// 直连 client(忽略环境与系统代理): 供 Bing 壁纸使用, 部分代理规则对 bing.com 反而超时
+pub fn client_direct() -> reqwest::blocking::Client {
+    reqwest::blocking::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .user_agent("Mozilla/5.0 kindle-dashboard")
+        .build()
+        .expect("reqwest client")
 }
 
 pub fn client() -> reqwest::blocking::Client {
@@ -334,14 +344,60 @@ pub fn build_data(base: &Path, cfg: &Config, cal: &Calendar) -> Value {
     if !cfg.hotlist_sources.is_empty() {
         data["hotlist"] = Value::Array(crate::extras::fetch_hotlist(&c, &cfg.hotlist_sources));
     }
-    if cfg.wallpaper {
+    if !cfg.crypto.is_empty() {
+        match crate::extras::fetch_crypto(&c, &cfg.crypto) {
+            Ok(v) => data["crypto"] = v,
+            Err(e) => crate::log_line(base, &format!("行情获取失败: {e}")),
+        }
+    }
+    data["idiom"] = crate::idioms::idiom_of_day(base);
+    if cfg.frame_mode == "wallpaper" {
         let out_dir = base.join("out");
-        let (w, h) = crate::render::dimensions(&cfg.orientation);
-        match crate::extras::fetch_wallpaper(&c, &out_dir, w, h) {
+        let (w, h) = crate::render::dimensions(&cfg.orientation, &cfg.device);
+        match crate::extras::fetch_wallpaper(&out_dir, w, h) {
             Ok(()) => data["wallpaper"] = json!({"file": "wallpaper.png", "credit": "Bing"}),
             Err(e) => crate::log_line(base, &format!("壁纸获取失败: {e}")),
         }
     }
+    data
+}
+
+/// 预览专用: build_data 带 60 秒 TTL 缓存。WebUI 实时预览每次改字段都会请求,
+/// 不缓存的话天气/RSS/一言/热榜会跟着反复打外网。key 覆盖影响数据组装的全部配置项,
+/// todo 与 time 在服务端取表单/当前值回填, 不参与缓存键。
+pub fn build_data_cached(base: &Path, cfg: &Config, cal: &Calendar) -> Value {
+    // 5 分钟: 预览频繁触发, 天气/RSS 这类数据旧几分钟没有感知差异,
+    // 换来的是绝大多数预览请求秒回(抓全套数据最慢 20+ 秒)
+    static CACHE: OnceLock<Mutex<(String, Instant, Value)>> = OnceLock::new();
+    let key = json!({
+        "city": cfg.city,
+        "modules": cfg.modules,
+        "rss": cfg.rss_sources.iter().map(|s| (&s.name, &s.url)).collect::<Vec<_>>(),
+        "rss_count": cfg.rss_count,
+        "cd": cfg.countdowns.iter().map(|c| (&c.name, &c.date)).collect::<Vec<_>>(),
+        "hot": cfg.hotlist_sources,
+        "sched": cfg.schedule_urls,
+        "wp": cfg.frame_mode,
+        "crypto": cfg.crypto,
+        "orient": cfg.orientation,
+        "device": cfg.device,
+        "todo_file": cfg.todo_file,
+    }).to_string();
+    let mut slot = CACHE.get_or_init(|| {
+        Mutex::new((String::new(), Instant::now() - Duration::from_secs(300), Value::Null))
+    }).lock().unwrap();
+    if slot.0 == key && slot.1.elapsed() < Duration::from_secs(300) {
+        return slot.2.clone();
+    }
+    let data = build_data(base, cfg, cal);
+    // 失败结果(带 weather_error)只缓存 45 秒: 临时网络抖动不该在预览里停留 5 分钟
+    let failed = data.get("weather_error").is_some();
+    let start = if failed {
+        Instant::now() - Duration::from_secs(300 - 45)
+    } else {
+        Instant::now()
+    };
+    *slot = (key, start, data.clone());
     data
 }
 

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=画框 orientations=portrait,landscape -->
+<style>
+  /* 画框 —— 装饰画。Bing 每日一图(或月相)占上部全幅,
+     下方白纸展签: 时钟与日期, 天气一句话。纸感画廊, 不叠字。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #fdfdfb; color: #161616;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .page { width: 100%; height: 100%; display: flex; flex-direction: column; }
+  .art { width: 100%; height: 76%; object-fit: cover; display: block;
+         background: #0d0d0d; }
+
+  /* 展签 */
+  .label { flex: 1; padding: 30px 96px 0; display: flex; flex-direction: column;
+    justify-content: center; }
+  .label .clock { font-size: 84px; font-weight: 200; line-height: 1;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .label .row { display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 16px; font-size: 23px; color: #444; }
+  .label .row .wx { font-weight: 600; }
+  .rule { height: 0; border-top: 1px solid #161616; margin: 20px 0 16px; }
+
+  .moonart { flex: 1; display: flex; align-items: center; justify-content: center;
+    background: #fdfdfb; }
+  .moonart svg { width: 300px; height: 300px; opacity: .92; }
+
+  /* 横版: 画幅 70%, 展签一行横排 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .art { height: 70%; }
+    .label { padding: 22px 96px 0; }
+    .label .clock { font-size: 64px; }
+    .label .row { margin-top: 10px; }
+    .rule { margin: 14px 0 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <img class="art" id="art" alt="" style="display:none">
+  <div class="moonart" id="moonart" style="display:none"></div>
+  <div class="label">
+    <div class="clock" id="clock">--:--</div>
+    <div class="rule"></div>
+    <div class="row">
+      <span id="datecn"></span>
+      <span class="wx" id="wx"></span>
+    </div>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+document.getElementById("clock").textContent = DATA.time;
+document.getElementById("datecn").textContent =
+  [DATA.date, DATA.weekday, DATA.lunar ? "农历 " + DATA.lunar : "",
+   DATA.jieqi || ""].filter(Boolean).join(" · ");
+const w = DATA.weather;
+document.getElementById("wx").textContent = w
+  ? w.code + " " + w.temp + "°C · " + w.city
+  : (DATA.weather_error || "");
+
+if (DATA.wallpaper) {
+  const art = document.getElementById("art");
+  art.src = DATA.wallpaper.file;
+  art.style.display = "block";
+} else {
+  const o = 'fill="none" stroke="#161616" stroke-width="1.2"', f = 'fill="#161616"';
+  const p = {
+    "新月": `<circle cx="12" cy="12" r="9" ${o}/>`,
+    "娥眉月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" ${f}/>`,
+    "上弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 Z" ${f}/>`,
+    "盈凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" ${f}/>`,
+    "满月": `<circle cx="12" cy="12" r="9" ${o}/><circle cx="12" cy="12" r="9" ${f}/>`,
+    "亏凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" ${f}/>`,
+    "下弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 Z" ${f}/>`,
+    "残月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ${f}/>`
+  };
+  const name = DATA.moon ? DATA.moon.name : "满月";
+  const m = document.getElementById("moonart");
+  m.style.display = "flex";
+  m.innerHTML = '<svg viewBox="0 0 24 24">' + (p[name] || p["满月"]) + '</svg>';
+}
+</script>
+</body>
+</html>

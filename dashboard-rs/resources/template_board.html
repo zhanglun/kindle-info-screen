@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=告示 orientations=portrait,landscape -->
+<style>
+  /* 告示 —— 夜间公告牌。要做的事, 用大字写出来:
+     待办逐条陈列, 倒数日以大数字压底。天气一行小注。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #0b0b0b; color: #f2f2ef;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .page { width: 100%; height: 100%; padding: 96px 96px 84px;
+    display: flex; flex-direction: column; }
+
+  .head { display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 16px; }
+  .head .d { font-size: 28px; font-weight: 700; }
+  .head .d span { font-size: 21px; font-weight: 400; color: #8f8f8a; margin-left: 12px; }
+  .head .wx { font-size: 22px; color: #b8b8b2; }
+  .head .wx b { font-size: 27px; color: #f2f2ef; }
+  .rule { border-top: 1px solid #3a3a3a; }
+
+  .lab { font-size: 15px; color: #8f8f8a; letter-spacing: 10px; margin: 38px 0 18px; }
+  .lab small { letter-spacing: 0; font-size: 13px; color: #6f6f6f; margin-left: 12px; }
+
+  .todo li { list-style: none; display: flex; align-items: baseline; gap: 24px;
+    padding: 17px 0; border-bottom: 1px solid #1e1e1e; font-size: 33px; }
+  .todo .no { flex: none; font-family: "SF Mono", Menlo, monospace;
+    font-size: 20px; color: #6f6f6f; }
+  .todo .none { font-size: 24px; color: #6f6f6f; padding: 12px 0; }
+
+  .cds { display: flex; gap: 64px; margin-top: auto; padding-top: 30px;
+    border-top: 1px solid #2a2a2a; }
+  .cds .cd { display: flex; flex-direction: column; gap: 6px; }
+  .cds .cd span { font-size: 19px; color: #8f8f8a; }
+  .cds .cd b { font-size: 58px; font-weight: 700; line-height: 1;
+    font-variant-numeric: tabular-nums; }
+  .cds .cd b small { font-size: 22px; font-weight: 400; color: #8f8f8a; }
+
+  /* 横版: 左待办, 右倒数日竖列大数字 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .page { flex-direction: row; gap: 0; padding: 88px 92px 80px; }
+    .col-l { width: 55%; padding-right: 68px; display: flex; flex-direction: column; }
+    .col-r { flex: 1; border-left: 1px solid #2a2a2a; padding-left: 68px;
+             display: flex; flex-direction: column; }
+    .todo li { font-size: 30px; padding: 16px 0; }
+    .cds { margin-top: 0; }
+    .cds .cd { margin-bottom: 34px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="col-l">
+    <div class="head">
+      <span class="d" id="d">——<span id="wd"></span></span>
+      <span class="wx" id="wx">——</span>
+    </div>
+    <div class="rule"></div>
+    <div class="lab">待 办<small id="todon"></small></div>
+    <ul class="todo" id="todo"></ul>
+    <div class="lab" style="margin-top:auto">倒 数 日</div>
+    <div class="cds" id="cds"></div>
+  </div>
+  <div class="col-r"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+
+document.getElementById("d").innerHTML = DATA.date + "<span>" + DATA.weekday + "</span>";
+const w = DATA.weather;
+if (w) {
+  const hi = w.days && w.days[0] ? w.days[0].hi : "";
+  document.getElementById("wx").innerHTML =
+    w.code + " <b>" + w.temp + "°</b>" + (hi !== "" ? " / " + hi + "°" : "");
+} else {
+  document.getElementById("wx").textContent = "天气暂缺";
+}
+
+const todo = DATA.todo || [];
+document.getElementById("todon").textContent = todo.length ? "共 " + todo.length + " 项" : "";
+document.getElementById("todo").innerHTML = todo.length
+  ? todo.slice(0, 6).map((t, i) =>
+      '<li><span class="no">' + String(i + 1).padStart(2, "0") + '</span><span>' + t + '</span></li>').join("")
+  : '<div class="none">今日无待办</div>';
+
+const cds = (DATA.countdowns || []).slice(0, 4);
+document.getElementById("cds").innerHTML = cds.length
+  ? cds.map(c => '<div class="cd"><span>距' + c.name + '</span>' +
+      '<b>' + c.days + '<small> 天</small></b></div>').join("")
+  : '<span class="none">暂无倒数日</span>';
+</script>
+</body>
+</html>

@@ -67,7 +67,8 @@ Kindle 拉取地址: http://<本机局域网IP>:8787/dashboard.png
 |---|---|---|
 | `city` | 字符串，`杭州` | 天气城市（自动地理编码） |
 | `template` | `template.html` | 模板文件名（可选值见 `/api/templates`） |
-| `orientation` | `portrait` / `landscape` | 竖版 1072×1448 / 横版 1448×1072 |
+| `orientation` | `portrait` / `landscape` | 竖版 / 横版（分辨率随 `device` 型号互换宽高） |
+| `device` | `pw4` | Kindle 型号，决定渲染分辨率（可选值见 `/api/devices`） |
 | `interval_min` | `10` | 刷新间隔（分钟，≥1） |
 | `port` | `8787` | HTTP 服务端口（1–65535） |
 | `rss_sources` | `[{"name","url"}]` | RSS 订阅源 |
@@ -77,7 +78,7 @@ Kindle 拉取地址: http://<本机局域网IP>:8787/dashboard.png
 | `modules` | `{}` | 模块开关：`weather` / `rss` / `yiyan` / `lunar` / `countdowns`，缺省全开 |
 | `schedule_urls` | `["https://…ics"]` | 日程 ics 订阅，非空即启用 |
 | `hotlist_sources` | `["github","weibo","bilibili"]` | 热榜聚合，非空即启用 |
-| `wallpaper` | `false` | Bing 每日壁纸（相框模式），按天缓存 |
+| `frame_mode` | `moon` / `wallpaper` | 相框夜画画面:月相(默认)或 Bing 每日一图。Bing 下载直连不走系统代理, 按天缓存 |
 | `kindle_host` | 空 = 关闭推送 | Kindle 的 IP；设置后渲染完成即 SSH 通知拉图 |
 | `kindle_user` | `root` | SSH 用户名 |
 | `kindle_ssh_port` | `2222` | SSH 端口（KOReader Dropbear 默认 2222） |

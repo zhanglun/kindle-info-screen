@@ -1,6 +1,8 @@
 {
   "city": "杭州",
-  "template": "template.html",
+  "template": "template_gallery.html",
+  "device": "pw4",
+  "frame_mode": "moon",
   "interval_min": 10,
   "port": 8787,
   "rss_sources": [],

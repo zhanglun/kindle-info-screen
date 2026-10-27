@@ -1,7 +1,8 @@
 //! 扩展数据模块: 日程(ics 订阅) / 热榜聚合 / Bing 每日壁纸(抖动灰度)。
 //! 解析规则与容错行为与 Python 版(dashboard.py)一一对应。
 use crate::data::http_get;
-use chrono::{Local, NaiveDate, NaiveDateTime, TimeDelta};
+use crate::lunar::round_py;
+use chrono::{Datelike, Local, NaiveDate, NaiveDateTime, TimeDelta};
 use serde_json::{json, Value};
 use std::path::Path;
 use std::time::Duration;
@@ -131,19 +132,22 @@ pub fn fetch_hotlist(c: &reqwest::blocking::Client, sources: &[String]) -> Vec<V
 // ---------- 每日壁纸(Bing, 抖动灰度) ----------
 /// 下载 Bing 每日一图, cover 裁切到屏尺寸并 Floyd-Steinberg 抖动成 1-bit 灰度。
 /// 按日期缓存, 当天只下载一次(与 Python 版同一缓存约定)。
-pub fn fetch_wallpaper(c: &reqwest::blocking::Client, out_dir: &Path,
-                       w: u32, h: u32) -> Result<(), String> {
+/// 直连不走代理: Bing 国内可直连, 系统代理的部分分流规则反而对 bing.com 超时。
+pub fn fetch_wallpaper(out_dir: &Path, w: u32, h: u32) -> Result<(), String> {
+    let c = crate::data::client_direct();
     let png = out_dir.join("wallpaper.png");
     let stamp = out_dir.join("wallpaper.date");
     let today = Local::now().date_naive().format("%Y-%m-%d").to_string();
-    if png.exists() && std::fs::read_to_string(&stamp).is_ok_and(|s| s.trim() == today) {
+    // 缓存戳带目标尺寸: 同一天切换朝向/型号后尺寸变了要重抓, 否则旧图被 cover 放大裁糊
+    let want = format!("{today} {w}x{h}");
+    if png.exists() && std::fs::read_to_string(&stamp).is_ok_and(|s| s.trim() == want) {
         return Ok(());
     }
-    let body = http_get(c, "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1",
+    let body = http_get(&c, "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1",
                         Duration::from_secs(20))?;
     let meta: Value = serde_json::from_slice(&body).map_err(|e| e.to_string())?;
     let url_path = meta["images"][0]["url"].as_str().ok_or("Bing 无今日壁纸")?;
-    let img_body = http_get(c, &format!("https://www.bing.com{url_path}"), Duration::from_secs(60))?;
+    let img_body = http_get(&c, &format!("https://www.bing.com{url_path}"), Duration::from_secs(60))?;
     let img = image::load_from_memory(&img_body).map_err(|e| e.to_string())?.to_luma8();
 
     // cover 裁切到 W×H
@@ -190,7 +194,7 @@ pub fn fetch_wallpaper(c: &reqwest::blocking::Client, out_dir: &Path,
     }
     image::save_buffer(&png, &px, w, h, image::ColorType::L8)
         .map_err(|e| format!("壁纸保存失败: {e}"))?;
-    std::fs::write(&stamp, today).map_err(|e| e.to_string())?;
+    std::fs::write(&stamp, want).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -215,7 +219,9 @@ mod tests {
         // 手动内联同一解析流程(抽取测试): 模拟 fetch_schedule 的解析主体
         let today = chrono::Local::now().date_naive();
         let _ = today;
-        let text = SAMPLE.to_string();
+        // 样例里"明天"硬编码会让测试在那天当天失败(日期炸弹), 按真实日期动态替换
+        let tomorrow = (today + chrono::Duration::days(1)).format("%Y%m%d").to_string();
+        let text = SAMPLE.replace("20261027", &tomorrow);
         let unfolded = text.replace("\r\n ", "").replace("\n ", "");
         let mut raw = Vec::new();
         let mut cur: Option<Vec<(String, String)>> = None;
@@ -246,6 +252,44 @@ mod tests {
         let d3 = parse_dt(&get(&raw[3], "DTSTART").unwrap()).unwrap();
         assert_ne!(d3.0.date(), chrono::Local::now().date_naive());
     }
+}
+
+// ---------- 行情(CoinGecko, 免费无需 key) ----------
+/// id -> 显示符号
+const CRYPTO_NAMES: &[(&str, &str)] = &[
+    ("bitcoin", "BTC"), ("ethereum", "ETH"), ("binancecoin", "BNB"),
+    ("solana", "SOL"), ("ripple", "XRP"), ("dogecoin", "DOGE"),
+    ("cardano", "ADA"), ("polkadot", "DOT"), ("tether", "USDT"),
+    ("litecoin", "LTC"), ("avalanche-2", "AVAX"), ("chainlink", "LINK"),
+];
+
+/// 抓取指定币种的美元价与 24h 涨幅。走代理逻辑(coingecko 视网络环境可能需要)。
+pub fn fetch_crypto(c: &reqwest::blocking::Client, ids: &[String]) -> Result<Value, String> {
+    if ids.is_empty() {
+        return Ok(json!([]));
+    }
+    let url = format!(
+        "https://api.coingecko.com/api/v3/simple/price?ids={}&vs_currencies=usd&include_24hr_change=true",
+        ids.join(","));
+    let body = http_get(c, &url, Duration::from_secs(15))?;
+    let d: Value = serde_json::from_slice(&body).map_err(|e| e.to_string())?;
+    let mut out = Vec::new();
+    for id in ids {
+        let sym = CRYPTO_NAMES.iter().find(|(i, _)| i == id)
+            .map(|(_, s)| s.to_string())
+            .unwrap_or_else(|| id.to_uppercase());
+        let node = &d[id.as_str()];
+        if node.is_null() || node["usd"].is_null() {
+            continue;
+        }
+        // 价格: >=1 保留整数位, <1 保留两位小数; 涨幅一位小数
+        let price = node["usd"].as_f64()
+            .map(|v| if v >= 1.0 { round_py(v) as f64 } else { (v * 100.0).round() / 100.0 });
+        let chg = node["usd_24h_change"].as_f64()
+            .map(|v| (v * 10.0).round() / 10.0);
+        out.push(json!({ "sym": sym, "price": price, "chg": chg }));
+    }
+    Ok(json!(out))
 }
 
 // ---------- 法定节假日 ----------

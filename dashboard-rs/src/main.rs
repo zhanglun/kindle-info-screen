@@ -6,6 +6,7 @@
 mod config;
 mod extras;
 mod data;
+mod idioms;
 mod lunar;
 mod render;
 mod server;
@@ -20,27 +21,20 @@ use std::time::{Duration, Instant};
 const EMBEDDED_RESOURCES: &[(&str, &str)] = &[
     ("config.json", include_str!("../resources/config.json")),
     ("todo.txt", include_str!("../resources/todo.txt")),
-    ("template.html", include_str!("../resources/template.html")),
-    ("template_editorial.html", include_str!("../resources/template_editorial.html")),
-    ("template_terminal.html", include_str!("../resources/template_terminal.html")),
-    ("template_zen.html", include_str!("../resources/template_zen.html")),
-    ("template_mono.html", include_str!("../resources/template_mono.html")),
-    ("template_split.html", include_str!("../resources/template_split.html")),
-    ("template_quad.html", include_str!("../resources/template_quad.html")),
+    ("template_gallery.html", include_str!("../resources/template_gallery.html")),
     ("template_frame.html", include_str!("../resources/template_frame.html")),
-    ("template_plaque.html", include_str!("../resources/template_plaque.html")),
-    ("template_broadsheet.html", include_str!("../resources/template_broadsheet.html")),
-    ("template_minimal.html", include_str!("../resources/template_minimal.html")),
-    ("template_timetable.html", include_str!("../resources/template_timetable.html")),
-    ("template_photo.html", include_str!("../resources/template_photo.html")),
-    ("template_clock.html", include_str!("../resources/template_clock.html")),
+    ("template_night.html", include_str!("../resources/template_night.html")),
+    ("template_board.html", include_str!("../resources/template_board.html")),
+    ("template_poem.html", include_str!("../resources/template_poem.html")),
+    ("template_sky.html", include_str!("../resources/template_sky.html")),
     ("calendar_table.json", include_str!("../resources/calendar_table.json")),
+    ("idioms.json", include_str!("../resources/idioms.json")),
     ("webui.html", include_str!("../resources/webui.html")),
 ];
 
 /// 内置资源版本: 升级时刷新"程序文件"(模板/农历表/webui); config.json 与 todo.txt
 /// 是用户数据, 仅在缺失时创建, 永不覆盖。改过内置模板的话升级后需要重新套用。
-const RESOURCE_VERSION: &str = "10";
+const RESOURCE_VERSION: &str = "34";
 
 /// 数据目录: 环境变量 > .app 内嵌运行(macOS) > 可执行文件旁的 resources/
 fn base_dir() -> PathBuf {

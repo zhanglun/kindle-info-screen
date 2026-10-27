@@ -32,38 +32,37 @@
   .lamp i { width: 8px; height: 8px; border-radius: 50%; background: #3a3a3a; }
   .lamp.on i { background: #ffb000; }
 
-  /* 翻牌格: 磨砂黑面 + 中缝 */
-  .flap { display: inline-block; background: linear-gradient(#1a1a1a 0 47%, #050505 53% 100%);
-    border: 1px solid #2a2a2a; border-radius: 3px; padding: 2px 9px; white-space: nowrap; }
-  .flap.amber { color: #ffb000; border-color: #7a5a10; }
-  .flap.red { color: #ff6b6b; border-color: #5a1520; }
-  .flap.dim { color: #8a8a8a; }
-
   /* 主布局: 左操作区 / 右预览(跟随滚动钉住) */
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) 450px;
     gap: 12px; align-items: stretch; margin-top: 12px; }
   .side { display: flex; flex-direction: column; gap: 12px; }
   .preview-zone { position: sticky; top: 12px; }
-  #preview { width: 100%; max-height: 78vh; object-fit: contain;
-    background: #060606; display: block; border: 1px solid #2a2a2a; border-radius: 4px; }
+  /* 实时预览: iframe 以 Kindle 真实分辨率渲染, JS 按 --ratio 缩放, 灰度近似墨水屏 */
+  .preview-stage { position: relative; margin: 0 auto; overflow: hidden;
+    width: min(100%, calc(66vh * var(--ratio, .7403)));
+    aspect-ratio: var(--ratio, .7403);
+    background: #060606; border: 1px solid #2a2a2a; border-radius: 4px; }
+  #previewFrame { position: absolute; top: 0; left: 0; border: 0;
+    transform-origin: 0 0; pointer-events: none; filter: grayscale(1); }
+  .pv-loading { position: absolute; inset: 0; display: none; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; z-index: 2;
+    background: rgba(6,6,6,.78); color: #b8b8b3; font-size: 13px; letter-spacing: 2px; }
+  .pv-loading.show { display: flex; }
+  .pv-loading .spin { width: 30px; height: 30px; border: 3px solid #2a2a2a;
+    border-top-color: #ffb000; border-radius: 50%; animation: pvspin .9s linear infinite; }
+  .pv-loading .sub { color: #6f6f6f; font-size: 12px; letter-spacing: 0; }
+  @keyframes pvspin { to { transform: rotate(360deg); } }
 
-  /* 主牌 */
-  .board { margin-top: 0; border: 2px solid #2a2d31;
-    box-shadow: inset 0 1px 0 #58606040; border-radius: 6px;
-    background: #121212; padding: 7px; }
-  .brow:first-child { border-radius: 4px; }
-  .brow:last-child { border-radius: 4px; }
-  .brow { display: grid; grid-template-columns: 170px 1fr 190px 150px;
-    border-bottom: 1px solid #26292d; cursor: pointer; }
-  .brow:last-child { border-bottom: none; }
-  .brow.head { background: #181818; cursor: default;
-    font-family: "SF Mono", Menlo, monospace; letter-spacing: 2px; color: #969696; }
-  .cell { padding: 11px 14px; overflow: hidden; text-overflow: ellipsis; }
-  .brow:not(.head):hover { background: #181818; }
-  .brow.sel { background: #211d10; box-shadow: inset 3px 0 0 #ffb000; }
-  .brow.sel .svc { font-weight: 900; color: #ffb000; }
-  .svc { font-weight: 700; letter-spacing: 1px; }
-  .mods { color: #9a9a9a; }
+  /* 版面选择: 紧凑两列卡 */
+  .tpls { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .tpl { border: 1px solid #2a2a2a; border-radius: 4px; padding: 9px 12px;
+    cursor: pointer; background: #121212; }
+  .tpl:hover { background: #181818; }
+  .tpl.sel { background: #211d10; border-color: #7a5a10; box-shadow: inset 3px 0 0 #ffb000; }
+  .tpl .nm { font-weight: 700; letter-spacing: 1px; }
+  .tpl.sel .nm { color: #ffb000; font-weight: 900; }
+  .tpl .or { color: #8a8a8a; font-size: 12px; font-family: "SF Mono", Menlo, monospace;
+    margin-top: 2px; }
 
   /* 分区色块(色块分区, 不描边) */
   .zone { margin-top: 12px; background: #121212; border-radius: 6px; padding: 13px 16px 15px; }
@@ -103,6 +102,28 @@
   .tg.on { background: #ffb000; color: #101010; border-color: #ffb000; font-weight: 900; }
   .tg.locked { opacity: .35; cursor: not-allowed; }
 
+  /* 模块行: 名称 + 说明靠左, 胶囊开关靠右; 从属配置随开关展开 */
+  .mod { display: flex; align-items: center; gap: 14px; padding: 13px 2px; }
+  .mod + .mod, .fold + .mod, .mod + .fold { border-top: 1px solid #1e1e1e; }
+  .mod .mi { flex: 1; min-width: 0; }
+  .mod .mn { font-weight: 700; }
+  .mod .md { color: #8a8a8a; font-size: 12px; margin-top: 2px; }
+  .sw { position: relative; width: 44px; height: 24px; border-radius: 12px;
+    background: #060606; border: 1px solid #2a2a2a; cursor: pointer;
+    flex: none; user-select: none; }
+  .sw i { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+    border-radius: 50%; background: #8a8a8a; transition: left .15s, background .15s; }
+  .sw.on { background: #7a5a10; border-color: #b8860b; }
+  .sw.on i { left: 22px; background: #ffb000; }
+  .fold { padding: 4px 2px 12px; }
+  .fold.off { display: none; }
+  .fold .fld { border-bottom: none; padding: 5px 0; }
+  .scan-row { display: flex; align-items: center; gap: 12px; padding: 7px 0;
+    border-bottom: 1px solid #1e1e1e; }
+  .scan-row .sm { font-family: "SF Mono", Menlo, monospace; }
+  .scan-row .ports { color: #ffb000; font-family: "SF Mono", Menlo, monospace; }
+  .scan-row .guess { flex: 1; color: #9a9a9a; font-size: 12px; }
+
   /* 行动 */
   .press { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
   .btn { font: inherit; font-weight: 900; letter-spacing: 2px; background: #ffb000;
@@ -119,16 +140,10 @@
   .dep .fail { color: #ff6b6b; }
 
   /* 预览: 站台监控 */
-  .addr { color: #9a9a9a; font-family: "SF Mono", Menlo, monospace; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap; flex: 1; }
   textarea { font: inherit; width: 100%; min-height: 110px; color: #f2f2ef;
     background: #060606; border: 1px solid #2a2a2a; border-radius: 3px;
     padding: 8px 10px; resize: vertical; }
   textarea:focus { outline: none; border-color: #ffb000; }
-
-  /* 状态翻牌动画: 保存后 X 轴翻转一次 */
-  @keyframes flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(88deg); } 100% { transform: rotateX(0); } }
-  .flipping { animation: flip .32s ease-in-out; transform-origin: center; }
 
   #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
     background: #ffb000; color: #101010; font-weight: 700; padding: 7px 22px;
@@ -148,9 +163,7 @@
     #platform { display: none; }
     #lastRender { max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .unit { white-space: nowrap; }
-    .brow { grid-template-columns: 110px 1fr 120px; }
-    .brow .cell:nth-child(2) { display: none; }       /* 模块列窄屏藏 */
-    .brow .cell:nth-child(4) { text-align: right; }
+    .tpls { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -163,27 +176,36 @@
 
 <div class="layout">
   <div class="ops">
-    <section class="board" id="board">
-      <div class="brow head">
-        <span class="cell">SERVICE / 版面</span><span class="cell">MODULES / 途经模块</span>
-        <span class="cell">ORIENTATION</span><span class="cell">STATUS</span>
-      </div>
-    </section>
-
     <section class="zone ground">
-      <div class="zhead"><b>工单</b><span class="en">WORK ORDER</span>
+      <div class="zhead"><b>版面</b><span class="en">LAYOUT</span>
         <span class="act meta" id="tplFile"></span></div>
-      <div class="fld"><span class="k">城市</span><input type="text" id="city"></div>
-      <div class="fld"><span class="k">刷新间隔</span><input type="number" id="interval" min="1" max="720" style="max-width:90px"><span class="unit">分钟</span></div>
-      <div class="fld"><span class="k">端口</span><input type="number" id="port" min="1" max="65535" style="max-width:110px"><span class="unit">重启生效</span></div>
-      <div class="fld"><span class="k">Kindle 地址</span><input type="text" id="kindleHost" placeholder="如 192.168.1.100"><span class="unit">留空则不推送</span></div>
+      <div class="fld"><span class="k">Kindle 型号</span><select id="device"></select>
+        <span class="unit" id="deviceHint"></span></div>
       <div class="fld"><span class="k">朝向</span><span class="toggles" id="orient">
         <span class="tg" data-v="portrait">竖版</span><span class="tg" data-v="landscape">横版</span></span>
         <span class="unit" id="orientHint"></span></div>
+      <div class="fld"><span class="k">旋转</span><span class="toggles" id="rotTg">
+        <span class="tg" data-v="cw">向右 90°</span><span class="tg" data-v="ccw">向左 90°</span></span>
+        <span class="unit">仅横版生效</span></div>
+      <div class="tpls" id="tpls" style="margin-top:8px"></div>
+    </section>
+
+    <section class="zone">
+      <div class="zhead"><b>基本设置</b><span class="en">SETTINGS</span></div>
+      <div class="fld"><span class="k">城市</span><input type="text" id="city"></div>
+      <div class="fld"><span class="k">刷新间隔</span><input type="number" id="interval" min="1" max="720" style="max-width:90px"><span class="unit">分钟</span></div>
+      <div class="fld"><span class="k">端口</span><input type="number" id="port" min="1" max="65535" style="max-width:110px"><span class="unit">重启生效</span></div>
+      <div class="fld"><span class="k">Kindle 地址</span><input type="text" id="kindleHost" placeholder="如 192.168.1.100">
+        <button class="add" id="btnScan">探测设备</button><span class="unit">留空则不推送</span></div>
+      <div class="fold off" id="scanFold">
+        <div class="meta-tip" id="scanTip"></div>
+        <div id="scanList"></div>
+      </div>
       <div class="fld"><span class="k">日程 ics</span><input type="url" id="schedule0" placeholder="https://…/calendar.ics(留空关闭)"></div>
-      <div class="fld"><span class="k">每日壁纸</span><span class="toggles" id="wallTg">
-        <span class="tg" data-v="on">Bing 每日一图</span></span>
-        <span class="unit">仅「相框」版式显示</span></div>
+      <div class="fld"><span class="k">相框画面</span><select id="frameMode">
+        <option value="moon">月相</option>
+        <option value="wallpaper">Bing 每日一图</option></select>
+        <span class="unit">仅「相框夜画」显示画面</span></div>
 
       <div class="press">
         <button class="btn" id="btnSave">刷新上屏</button>
@@ -194,17 +216,35 @@
     </section>
 
     <section class="zone">
-      <div class="zhead"><b>途经模块</b><span class="en">MODULES</span><span class="act meta">关掉的模块不上屏</span></div>
-      <div class="toggles" id="moduleTg">
-        <span class="tg" data-m="weather">天气</span><span class="tg" data-m="rss">RSS</span>
-        <span class="tg" data-m="yiyan">一言</span><span class="tg" data-m="lunar">农历节气</span>
-        <span class="tg" data-m="countdowns">倒数日</span></div>
-      <div class="fld" style="margin-top:8px"><span class="k">热榜源</span><span class="toggles" id="hotTg">
-        <span class="tg" data-s="weibo">微博</span><span class="tg" data-s="bilibili">B站</span><span class="tg" data-s="github">GitHub</span></span>
-        <span class="unit">各取前 5 条</span></div>
-      <div class="fld"><span class="k">RSS 源</span><span class="list" id="rssList" style="flex:1"></span></div>
-      <div class="press"><button class="add" id="btnAddRss">+ 添加 RSS 源</button>
-        <span class="meta" id="rssCountWrap">每源 <input type="number" id="rssCount" min="1" max="20" style="width:52px"> 条</span></div>
+      <div class="zhead"><b>功能模块</b><span class="en">MODULES</span><span class="act meta">关掉的不上屏</span></div>
+      <div class="mod"><div class="mi"><div class="mn">天气</div>
+        <div class="md">实时温度与四日预报 · 城市在「基本设置」</div></div>
+        <span class="sw" data-m="weather"><i></i></span></div>
+      <div class="mod"><div class="mi"><div class="mn">RSS</div>
+        <div class="md">订阅源头条汇总</div></div>
+        <span class="sw" data-m="rss"><i></i></span></div>
+      <div class="fold" id="rssFold">
+        <div class="fld"><span class="k">RSS 源</span><span class="list" id="rssList" style="flex:1"></span></div>
+        <div class="press"><button class="add" id="btnAddRss">+ 添加 RSS 源</button>
+          <span class="meta" id="rssCountWrap">每源 <input type="number" id="rssCount" min="1" max="20" style="width:52px"> 条</span></div>
+      </div>
+      <div class="mod"><div class="mi"><div class="mn">一言</div>
+        <div class="md">每日一句随机摘抄</div></div>
+        <span class="sw" data-m="yiyan"><i></i></span></div>
+      <div class="mod"><div class="mi"><div class="mn">农历节气</div>
+        <div class="md">日期旁的农历与节气提示</div></div>
+        <span class="sw" data-m="lunar"><i></i></span></div>
+      <div class="mod"><div class="mi"><div class="mn">倒数日</div>
+        <div class="md">周末、法定假日, 自定义条目在下方「倒数日」区</div></div>
+        <span class="sw" data-m="countdowns"><i></i></span></div>
+      <div class="mod"><div class="mi"><div class="mn">热榜聚合</div>
+        <div class="md">微博 / B站 / GitHub, 各取前 5 条</div></div>
+        <span class="sw" id="hotSw"><i></i></span></div>
+      <div class="fold" id="hotFold">
+        <div class="meta-tip">选择聚合的热榜源:</div>
+        <div class="fld"><span class="k">热榜源</span><span class="toggles" id="hotTg">
+          <span class="tg" data-s="weibo">微博</span><span class="tg" data-s="bilibili">B站</span><span class="tg" data-s="github">GitHub</span></span></div>
+      </div>
     </section>
 
     <section class="zone" id="cdListZone">
@@ -226,14 +266,26 @@
 
   <div class="side">
     <section class="zone preview-zone">
-      <div class="zhead"><b>站台监控</b><span class="en">PREVIEW</span>
-        <span class="act"><button class="add" id="btnCopy">复制拉取地址</button></span></div>
-      <div class="fld" style="border:none;padding-top:0"><span class="addr" id="addr"></span></div>
-      <img id="preview" alt="dashboard 预览" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='9'%3E%3Crect width='16' height='9' fill='%23121212'/%3E%3C/svg%3E">
+      <div class="zhead"><b>预览</b><span class="en">LIVE</span>
+        <span class="act meta" id="previewState">加载中…</span></div>
+      <div class="preview-stage" id="previewStage">
+        <iframe id="previewFrame" title="模板实时预览"></iframe>
+        <div class="pv-loading" id="pvLoading">
+          <div class="spin"></div>
+          <span>正在抓取数据…</span>
+          <span class="sub">首次或数据过期时最长约 30 秒, 请稍候</span>
+        </div>
+      </div>
+      <div class="press" style="margin-top:8px">
+        <button class="add" id="btnPng">查看上屏 PNG</button>
+        <button class="add" id="btnCopy">复制拉取地址</button>
+        <span class="meta" id="addr" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      </div>
+      <div class="meta" style="margin-top:4px">灰度近似墨水屏 · 上屏以 PNG 为准 · 渲染完成后自动同步</div>
     </section>
 
     <section class="zone">
-      <div class="zhead"><b>Departures</b><span class="en">渲染史</span>
+      <div class="zhead"><b>渲染历史</b><span class="en">HISTORY</span>
         <span class="act meta" id="renderCount"></span></div>
       <div id="depList"><div class="dep"><span class="t">--</span><span class="ok">暂无记录</span></div></div>
     </section>
@@ -243,7 +295,7 @@
 <div id="toast"></div>
 <script>
 const $ = id => document.getElementById(id);
-let CFG = null, TPLS = [];
+let CFG = null, TPLS = [], DEVICES = [], ROTATE = "cw";
 let depCount = 0, rendering = false;
 let pendingApply = false, applyTimer = null;
 
@@ -264,51 +316,37 @@ async function api(path, opts) {
   if (!r.ok) throw new Error((await r.text()) || r.statusText);
   return r.json();
 }
-function flap(text, cls) {
-  return `<span class="flap ${cls || ""}">${text}</span>`;
-}
-function setStatus(text, cls, animate) {
-  const cell = document.querySelector(".brow.sel .cell:nth-child(4)") ||
-               document.querySelector(".brow:not(.head) .cell:nth-child(4)");
-  if (cell) {
-    cell.innerHTML = flap(text, cls);
-    if (animate) { const f = cell.firstChild; f.classList.add("flipping");
-      setTimeout(() => f.classList.remove("flipping"), 400); }
-  }
-}
 
 function renderBoard() {
   const known = TPLS.map(t => t.file);
-  const active = known.includes(CFG.template) ? CFG.template : "template.html";
+  const active = known.includes(CFG.template) ? CFG.template : (known[0] || CFG.template);
   CFG.template = active;
-  const DEFAULT_ON = {weather:1, rss:1, yiyan:1, lunar:1, countdowns:1};
-  const NAMES = {weather:"天气", rss:"RSS", yiyan:"一言", lunar:"农历", countdowns:"倒数日"};
-  const mods = Object.keys({...DEFAULT_ON, ...(CFG.modules || {})})
-    .filter(k => (CFG.modules || {})[k] ?? true).map(k => NAMES[k] || k).join(" · ") || "—";
-  const board = $("board");
-  board.querySelectorAll(".brow:not(.head)").forEach(e => e.remove());
+  const wrap = $("tpls");
+  wrap.innerHTML = "";
   for (const t of TPLS) {
-    const row = document.createElement("div");
-    row.className = "brow" + (t.file === active ? " sel" : "");
-    row.dataset.file = t.file;
-    const status = t.file === active ? flap("ON TIME") : flap("READY", "dim");
-    row.innerHTML = `<span class="cell svc">${t.name}</span>
-      <span class="cell mods">${t.file === active ? (mods) : "—"}</span>
-      <span class="cell mono">${t.orientations.join(" / ")}</span>
-      <span class="cell">${status}</span>`;
-    row.onclick = () => {
+    const card = document.createElement("div");
+    card.className = "tpl" + (t.file === active ? " sel" : "");
+    card.dataset.file = t.file;
+    card.innerHTML = `<div class="nm">${t.name}</div>
+      <div class="or">${t.file === active ? "SELECTED" : t.orientations.join(" / ")}</div>`;
+    card.onclick = () => {
       CFG.template = t.file;
       if (!t.orientations.includes(selOrientation())) setOrientation(t.orientations[0]);
       renderBoard();
       renderOrientationGate();
       toast(`已选「${t.name}」,正在上屏…`);
+      schedulePreview(150);
       scheduleApply();
     };
-    board.appendChild(row);
+    wrap.appendChild(card);
   }
   $("tplFile").textContent = active;
 }
 function selOrientation() { return document.querySelector("#orient .on")?.dataset.v || "portrait"; }
+function updateDeviceHint() {
+  const d = curDevice();
+  $("deviceHint").textContent = `${d.w}×${d.h}`;
+}
 function setOrientation(v) {
   document.querySelectorAll("#orient .tg").forEach(b => b.classList.toggle("on", b.dataset.v === v));
 }
@@ -318,7 +356,7 @@ function bindToggle(containerId, isOn, onFlip) {
     el.onclick = () => { el.classList.toggle("on"); onFlip && onFlip(el); };
   });
 }
-function listEditor(el, items, fields) {
+function listEditor(el, items, fields, onChange) {
   el.innerHTML = "";
   items.forEach((it, i) => {
     const row = document.createElement("div");
@@ -327,27 +365,34 @@ function listEditor(el, items, fields) {
       const inp = document.createElement("input");
       inp.value = it[f.k] || ""; inp.placeholder = f.ph;
       inp.style.flex = f.flex || "1";
-      inp.oninput = () => it[f.k] = inp.value;
+      inp.oninput = () => { it[f.k] = inp.value; onChange && onChange(); };
       row.appendChild(inp);
     });
     const del = document.createElement("button");
     del.className = "del"; del.textContent = "删";
-    del.onclick = () => { items.splice(i, 1); listEditor(el, items, fields); };
+    del.onclick = () => { items.splice(i, 1); listEditor(el, items, fields, onChange); onChange && onChange(); };
     row.appendChild(del);
     el.appendChild(row);
   });
 }
 
 async function load() {
-  const [status, cfg, tpls, todo] = await Promise.all([
-    api("/api/status"), api("/api/config"), api("/api/templates"), api("/api/todo")]);
+  const [status, cfg, tpls, todo, devices] = await Promise.all([
+    api("/api/status"), api("/api/config"), api("/api/templates"), api("/api/todo"),
+    api("/api/devices")]);
   CFG = cfg; TPLS = tpls.templates;
+  DEVICES = devices.devices;
+  const devSel = $("device");
+  devSel.innerHTML = DEVICES.map(d => `<option value="${d.key}">${d.name}</option>`).join("");
+  devSel.value = DEVICES.some(d => d.key === cfg.device) ? cfg.device : "pw4";
+  devSel.onchange = () => { updateDeviceHint(); schedulePreview(150); scheduleApply(); };
+  updateDeviceHint();
   if (!CFG.modules) CFG.modules = {};
   $("platform").textContent = "PLATFORM " + status.port;
   $("lastRender").textContent = "上次上屏 " + status.last_render;
   // 下轮自动渲染 = 上次上屏 + 间隔(STORY 的"下轮何时")
   (() => {
-    const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(status.last_render || "");
+    const m = /^(\d{2}):(\d{2})/.exec(status.last_render || "");
     const iv = +(cfg.interval_min || 10);
     $("nextAuto").textContent = m
       ? "NEXT AUTO " + String((+m[1] + Math.floor((+m[2] + iv) / 60)) % 24).padStart(2, "0")
@@ -368,30 +413,74 @@ async function load() {
       : "无";
   }).catch(() => { $("holidayInfo").textContent = "获取失败"; });
   listEditor($("rssList"), cfg.rss_sources || [],
-    [{k:"name",ph:"名称",flex:"0 0 110px"},{k:"url",ph:"RSS 地址"}]);
+    [{k:"name",ph:"名称",flex:"0 0 110px"},{k:"url",ph:"RSS 地址"}], () => schedulePreview(700));
   renderCountdowns(cfg.countdowns || []);
-  bindToggle("moduleTg", d => (CFG.modules[d.m] ?? true), el => {
-    CFG.modules[el.dataset.m] = el.classList.contains("on");
+  // 模块行开关: 切 CFG.modules, 从属编辑区随开关展开; 热榜开关 = hotlist_sources 非空
+  const syncFolds = () => {
+    $("rssFold").classList.toggle("off", !(CFG.modules.rss ?? true));
+    $("hotFold").classList.toggle("off", !(cfg.hotlist_sources || []).length);
+    $("hotSw").classList.toggle("on", !!(cfg.hotlist_sources || []).length);
+  };
+  document.querySelectorAll(".sw[data-m]").forEach(sw => {
+    sw.classList.toggle("on", CFG.modules[sw.dataset.m] ?? true);
+    sw.onclick = () => {
+      CFG.modules[sw.dataset.m] = sw.classList.toggle("on");
+      syncFolds();
+      schedulePreview(300);
+    };
   });
   bindToggle("hotTg", d => (cfg.hotlist_sources || []).includes(d.s), el => {
     const set = new Set(cfg.hotlist_sources || []);
     el.classList.contains("on") ? set.add(el.dataset.s) : set.delete(el.dataset.s);
     cfg.hotlist_sources = [...set];
+    syncFolds();
+    schedulePreview(300);
   });
-  bindToggle("wallTg", () => !!cfg.wallpaper, el => {
-    cfg.wallpaper = el.classList.contains("on");
-    // 壁纸要配支持背景图的版式:「相框夜画」首选,编辑部/终端播报次之
-    const wallpaperOk = ["template_frame.html", "template_editorial.html", "template_terminal.html"];
-    if (cfg.wallpaper && !wallpaperOk.includes(CFG.template)) {
-      CFG.template = "template_frame.html";
-      renderBoard(); renderOrientationGate();
-      toast("Bing 壁纸已搭配「相框夜画」版式");
+  $("hotSw").onclick = () => {
+    const on = $("hotSw").classList.toggle("on");
+    cfg.hotlist_sources = on ? ["weibo", "bilibili", "github"] : [];
+    bindToggle("hotTg", d => (cfg.hotlist_sources || []).includes(d.s), el => {
+      const set = new Set(cfg.hotlist_sources || []);
+      el.classList.contains("on") ? set.add(el.dataset.s) : set.delete(el.dataset.s);
+      cfg.hotlist_sources = [...set];
+      syncFolds();
+      schedulePreview(300);
+    });
+    syncFolds();
+    schedulePreview(300);
+  };
+  syncFolds();
+  $("frameMode").value = cfg.frame_mode === "moon" ? "moon" : "wallpaper";
+  $("frameMode").onchange = () => {
+    if ($("frameMode").value === "wallpaper") {
+      const bgOk = ["template_frame.html", "template_terminal.html"];
+      if (!bgOk.includes(CFG.template)) {
+        CFG.template = "template_frame.html";
+        renderBoard(); renderOrientationGate();
+        toast("Bing 每日一图已搭配「相框夜画」版式");
+      }
     }
+    schedulePreview(300);
+    scheduleApply();
+  };
+  ROTATE = cfg.rotate === "ccw" ? "ccw" : "cw";
+  document.querySelectorAll("#rotTg .tg").forEach(b => {
+    b.classList.toggle("on", b.dataset.v === ROTATE);
+    b.onclick = () => {
+      if (selOrientation() !== "landscape") {
+        toast("画面旋转仅在横版下生效", true); return;
+      }
+      ROTATE = b.dataset.v;
+      document.querySelectorAll("#rotTg .tg").forEach(x => x.classList.toggle("on", x === b));
+      layoutPreview();
+      schedulePreview(150);
+      scheduleApply();
+    };
   });
   setOrientation(cfg.orientation || "portrait");
   renderBoard();
   renderOrientationGate();
-  reloadPreview();
+  refreshPreview();
 }
 function renderOrientationGate() {
   const t = TPLS.find(t => t.file === CFG.template);
@@ -410,13 +499,85 @@ let CD_ITEMS = [];
 function renderCountdowns(items) {
   CD_ITEMS = items;
   listEditor($("cdList"), items,
-    [{k:"name",ph:"名称",flex:"0 0 140px"},{k:"date",ph:"2027-01-01",flex:"0 0 150px"}]);
+    [{k:"name",ph:"名称",flex:"0 0 140px"},{k:"date",ph:"2027-01-01",flex:"0 0 150px"}],
+    () => schedulePreview(700));
 }
-function reloadPreview() { $("preview").src = "/dashboard.png?t=" + Date.now(); }
+
+/* ---- 实时预览: 把表单当前值 POST 给 /api/preview, srcdoc 注入 iframe 即时渲染。
+   服务端同步抓数据可达数秒, 单请求在途 + 记一笔待刷新, 回来后自动补一轮(与上屏的
+   pendingApply 同款约定); 画幅按所选型号分辨率等比缩放, 横竖版互换宽高。 ---- */
+function curDevice() {
+  return DEVICES.find(d => d.key === ($("device") ? $("device").value : "")) ||
+         DEVICES[0] || { key: "pw4", w: 1072, h: 1448 };
+}
+let previewTimer = null, previewBusy = false, previewPending = false;
+
+function layoutPreview() {
+  const d = curDevice();
+  const landscape = CFG.orientation === "landscape";
+  const stage = $("previewStage"), f = $("previewFrame");
+  if (!landscape) {
+    // 竖版: 内容即输出, 直接等比缩放
+    stage.style.setProperty("--ratio", (d.w / d.h).toFixed(5));
+    f.style.width = d.w + "px";
+    f.style.height = d.h + "px";
+    f.style.transform = `scale(${stage.clientWidth / d.w})`;
+  } else {
+    // 横版: 内容 d.h×d.w, 上屏前旋转 90° 变 d.w×d.h, 预览同步旋转所见即所得
+    const contentW = d.h, contentH = d.w;
+    stage.style.setProperty("--ratio", (d.w / d.h).toFixed(5));
+    f.style.width = contentW + "px";
+    f.style.height = contentH + "px";
+    const sc = stage.clientWidth / d.w;
+    f.style.transform = ROTATE === "ccw"
+      ? `scale(${sc}) translateY(${contentW}px) rotate(-90deg)`
+      : `scale(${sc}) translateX(${contentH}px) rotate(90deg)`;
+  }
+  // 旋转仅横版生效, 竖版时选项锁定
+  document.querySelectorAll("#rotTg .tg").forEach(b =>
+    b.classList.toggle("locked", !landscape));
+}
+new ResizeObserver(layoutPreview).observe($("previewStage"));
+
+function previewState(text, tone) {
+  const s = $("previewState");
+  s.textContent = text;
+  s.style.color = tone === "err" ? "#ff6b6b" : tone === "busy" ? "#ffb000" : "";
+}
+
+function schedulePreview(delay = 500) {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(refreshPreview, delay);
+}
+
+async function refreshPreview() {
+  if (previewBusy) { previewPending = true; return; }
+  previewBusy = true;
+  previewState("RENDERING", "busy");
+  $("pvLoading").classList.add("show");
+  layoutPreview();
+  try {
+    const r = await fetch("/api/preview", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...collectConfig(), todo_content: $("todo").value }) });
+    if (!r.ok) {
+      let msg = r.statusText;
+      try { msg = (await r.json()).error || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    $("previewFrame").srcdoc = await r.text();
+    layoutPreview();
+    previewState("ONLINE");
+  } catch (e) {
+    previewState("FAILED · " + e.message, "err");
+  }
+  $("pvLoading").classList.remove("show");
+  previewBusy = false;
+  if (previewPending) { previewPending = false; refreshPreview(); }
+}
 
 async function afterSave() {
   const before = (await api("/api/status")).last_render;
-  setStatus("RENDERING", "amber", true);
   rendering = true;
   for (let i = 0; i < 45; i++) {
     await new Promise(r => setTimeout(r, 2000));
@@ -424,7 +585,6 @@ async function afterSave() {
       const s = await api("/api/status");
       if (s.last_render !== before) {
         rendering = false;
-        setStatus("ON TIME", "", true);
         $("lamp").classList.add("on");
         $("lastRender").textContent = "上次上屏 " + s.last_render;
         depCount++;
@@ -436,13 +596,12 @@ async function afterSave() {
         if (list.firstElementChild.textContent.includes("暂无")) list.innerHTML = "";
         list.prepend(dep);
         $("renderCount").textContent = depCount + " 趟";
-        reloadPreview();
+        schedulePreview(300);
         return true;
       }
     } catch (e) { break; }
   }
   rendering = false;
-  setStatus("FAILED", "red", true);
   return false;
 }
 function collectConfig() {
@@ -451,6 +610,8 @@ function collectConfig() {
     city: $("city").value.trim() || "北京",
     template: CFG.template,
     orientation: selOrientation(),
+    rotate: ROTATE,
+    device: $("device").value,
     interval_min: +$("interval").value || 10,
     port: +$("port").value || 8787,
     kindle_host: $("kindleHost").value.trim(),
@@ -459,7 +620,7 @@ function collectConfig() {
     modules: CFG.modules || {},
     schedule_urls: urls,
     hotlist_sources: CFG.hotlist_sources || [],
-    wallpaper: !!CFG.wallpaper,
+    frame_mode: $("frameMode").value,
     rss_sources: (CFG.rss_sources || []).filter(s => (s.name||"").trim() && (s.url||"").trim()),
     countdowns: CD_ITEMS.filter(c => (c.name||"").trim() && (c.date||"").trim()),
   };
@@ -504,17 +665,56 @@ document.querySelectorAll("#orient .tg").forEach(b =>
       return;
     }
     CFG.orientation = b.dataset.v; setOrientation(b.dataset.v);
+    schedulePreview(150);
     scheduleApply();
   });
-$("btnAddRss").onclick = () => { CFG.rss_sources.push({name:"",url:""}); 
-  listEditor($("rssList"), CFG.rss_sources, [{k:"name",ph:"名称",flex:"0 0 110px"},{k:"url",ph:"RSS 地址"}]); };
+// 文本/数字类改动防抖久一点, 避免每敲一键都打一次数据接口
+["city", "schedule0", "rssCount", "todo"].forEach(id =>
+  $(id).oninput = () => schedulePreview(700));
+$("btnAddRss").onclick = () => { CFG.rss_sources.push({name:"",url:""});
+  listEditor($("rssList"), CFG.rss_sources, [{k:"name",ph:"名称",flex:"0 0 110px"},{k:"url",ph:"RSS 地址"}], () => schedulePreview(700)); };
 $("btnAddCd").onclick = () => { CD_ITEMS.push({name:"",date:""}); renderCountdowns(CD_ITEMS); };
+$("btnScan").onclick = async () => {
+  const btn = $("btnScan");
+  btn.disabled = true; btn.textContent = "探测中…";
+  $("scanFold").classList.remove("off");
+  $("scanList").innerHTML = "";
+  $("scanTip").textContent = "正在读取局域网设备并探测 KOReader 端口, 约 3~8 秒…";
+  try {
+    const r = await api("/api/scan");
+    const devs = r.devices || [];
+    if (!devs.length) {
+      $("scanTip").textContent =
+        "未找到开了 SSH 的设备。确认 Kindle 与本机同一网络且已开 KOReader 的 SSH;" +
+        "或先让 Kindle 拉一次图片再试(它一拉图就会出现在设备表里)。";
+      return;
+    }
+    $("scanTip").textContent = "找到 " + devs.length + " 台候选, 点「使用」填入:";
+    $("scanList").innerHTML = devs.map(d =>
+      '<div class="scan-row"><span class="sm">' + d.ip + '</span>' +
+      '<span class="ports">' + d.ports.map(p => ":" + p).join(" ") + '</span>' +
+      '<span class="guess">' + d.guess + '</span>' +
+      '<button class="add" data-ip="' + d.ip + '">使用</button></div>').join("");
+    $("scanList").querySelectorAll("button[data-ip]").forEach(b => {
+      b.onclick = () => {
+        $("kindleHost").value = b.dataset.ip;
+        toast("已填入 " + b.dataset.ip + ", 记得刷新上屏保存");
+      };
+    });
+  } catch (e) {
+    $("scanTip").textContent = "探测失败: " + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "探测设备";
+  }
+};
+$("btnPng").onclick = () =>
+  window.open("/dashboard.png?t=" + Date.now(), "_blank");
 $("btnCopy").onclick = () =>
   navigator.clipboard.writeText($("addr").textContent.replace("Kindle 拉取: ", ""))
     .then(() => toast("已复制"), () => toast("复制失败", true));
 
 load().catch(e => toast("加载失败: " + e.message, true));
-setInterval(() => { if (!document.hidden && !rendering) reloadPreview(); }, 60000);
+setInterval(() => { if (!document.hidden && !rendering) schedulePreview(); }, 60000);
 </script>
 </body>
 </html>

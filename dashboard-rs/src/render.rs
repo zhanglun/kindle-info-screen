@@ -1,5 +1,8 @@
-//! 渲染: 数据注入 HTML 模板 -> 调用系统 Edge/Chrome 无头截图 -> 转灰度。
-//! 截图策略与原 Python 版一致: 轮询 PNG 落盘尺寸稳定即认为写完, 进程不退则强杀。
+//! 渲染: 数据注入 HTML 模板 -> 截图 -> 转灰度。
+//! 截图按平台分流: macOS 优先系统 WKWebView sidecar(零安装, build.rs 编译的
+//! webview_shot, 同步等待退出); 缺失或失败回退 Edge/Chrome 无头截图。
+//! Windows 主路径即 Edge(系统预装); 未来 WebView2 后端在此处加分支。
+//! 浏览器路径沿用原 Python 版策略: 轮询 PNG 落盘尺寸稳定即认为写完, 进程不退则强杀。
 use crate::config;
 use crate::lunar::Calendar;
 use std::path::{Path, PathBuf};
@@ -9,6 +12,31 @@ use std::time::{Duration, Instant};
 
 pub const W: u32 = 1072;
 pub const H: u32 = 1448;
+
+/// Kindle 型号 -> 屏幕分辨率(竖版), 横版互换。未识别的 device 回退 pw4。
+pub struct DeviceInfo {
+    pub key: &'static str,
+    pub name: &'static str,
+    pub w: u32,
+    pub h: u32,
+}
+
+pub const DEVICES: &[DeviceInfo] = &[
+    DeviceInfo { key: "basic", name: "基础款 2016/2019(第8/10代)", w: 600, h: 800 },
+    DeviceInfo { key: "pw12", name: "Paperwhite 1·2(第5/6代)", w: 758, h: 1024 },
+    DeviceInfo { key: "pw3", name: "Paperwhite 3(第7代)· Voyage", w: W, h: H },
+    DeviceInfo { key: "pw4", name: "Paperwhite 4(第10代)", w: W, h: H },
+    DeviceInfo { key: "basic22", name: "基础款 2022/2024(第11/12代)", w: W, h: H },
+    DeviceInfo { key: "pw5", name: "Paperwhite 5(第11代)", w: 1236, h: 1648 },
+    DeviceInfo { key: "oasis", name: "Oasis 2/3(第8/9代)", w: 1264, h: 1680 },
+    DeviceInfo { key: "scribe", name: "Scribe(10.2吋)", w: 1860, h: 2480 },
+];
+
+pub fn device_size(device: &str) -> (u32, u32) {
+    DEVICES.iter().find(|d| d.key == device)
+        .map(|d| (d.w, d.h))
+        .unwrap_or((W, H))
+}
 
 const BROWSER_CANDIDATES: &[&str] = &[
     // Windows
@@ -23,9 +51,10 @@ fn find_browser() -> Option<PathBuf> {
     BROWSER_CANDIDATES.iter().map(PathBuf::from).find(|p| p.exists())
 }
 
-/// 朝向对应的截图尺寸(PW4 面板横竖互换)
-pub fn dimensions(orientation: &str) -> (u32, u32) {
-    if orientation == "landscape" { (H, W) } else { (W, H) }
+/// 朝向对应的截图尺寸(按所选 Kindle 型号, 横竖互换)
+pub fn dimensions(orientation: &str, device: &str) -> (u32, u32) {
+    let (w, h) = device_size(device);
+    if orientation == "landscape" { (h, w) } else { (w, h) }
 }
 
 /// 模板自描述信息(来自文件头部的 kindle-template 注释, 与 Python 版解析规则一致)
@@ -38,14 +67,10 @@ pub struct TemplateInfo {
 
 /// 实际启用的模板白名单(list_templates 与 render_once 以此为准);新模板两处都要记得加
 pub const ALLOWED_TEMPLATES: &[&str] = &[
-    // 信息日报 / 晨报编辑部 / 终端播报
-    "template.html", "template_editorial.html", "template_terminal.html",
-    // 静默须知 / 极简卡片(状态优先 & 极简卡片流派)
-    "template_zen.html", "template_mono.html",
-    // 左右分栏 / 四象限(TRMNL 栅格流派)
-    "template_split.html", "template_quad.html",
-    // 相框夜画 / 画廊铭牌(相框艺术流派)
-    "template_frame.html", "template_plaque.html",
+    // 画框(白底装饰) / 月相 / 夜钟 —— 夜画系列
+    "template_gallery.html", "template_frame.html", "template_night.html",
+    // 告示(夜间公告牌) / 诗笺 / 星图(夜览仪表)
+    "template_board.html", "template_poem.html", "template_sky.html",
 ];
 
 /// 扫描数据目录下的 template*.html, 解析头部元数据; 无元数据的文件以文件名兜底, 仅竖版
@@ -87,6 +112,34 @@ fn abs_path(p: &Path) -> PathBuf {
         p.to_path_buf()
     } else {
         std::env::current_dir().map(|cwd| cwd.join(p)).unwrap_or_else(|_| p.to_path_buf())
+    }
+}
+
+/// macOS 渲染 sidecar: build.rs 用 swiftc 编译的 WKWebView 截图工具,
+/// 与主程序同目录分发(.app 的 Contents/MacOS/ 或 target/<profile>/)。
+#[cfg(target_os = "macos")]
+fn sidecar_path() -> Option<PathBuf> {
+    std::env::current_exe().ok()
+        .and_then(|exe| exe.parent().map(|d| d.join("webview_shot")))
+        .filter(|p| p.is_file())
+}
+
+/// WKWebView sidecar 截图: sidecar 自带超时且写完 PNG 即退出, 同步等待即可,
+/// 不需要浏览器路径那套"轮询文件尺寸"的判断。
+#[cfg(target_os = "macos")]
+fn shoot_webview(sidecar: &Path, html: &Path, png: &Path, w: u32, h: u32) -> Result<(), String> {
+    let _ = std::fs::remove_file(png);
+    let out = Command::new(sidecar)
+        .arg(html)
+        .arg(png)
+        .args([w.to_string(), h.to_string(), "20".to_string()])
+        .output()
+        .map_err(|e| format!("sidecar 启动失败: {e}"))?;
+    if out.status.success() && std::fs::metadata(png).map(|m| m.len() > 1_000).unwrap_or(false) {
+        Ok(())
+    } else {
+        Err(format!("sidecar 截图失败: {}",
+            String::from_utf8_lossy(&out.stderr).trim()))
     }
 }
 
@@ -141,7 +194,7 @@ pub fn render_once(base: &Path, out_dir: &Path, cal: &Calendar) -> Result<String
     let template = if ALLOWED_TEMPLATES.contains(&cfg.template.as_str()) {
         &cfg.template
     } else {
-        "template.html"
+        ALLOWED_TEMPLATES[0]
     };
     let tpl_path = base.join(template);
     let tpl = std::fs::read_to_string(&tpl_path)
@@ -152,25 +205,60 @@ pub fn render_once(base: &Path, out_dir: &Path, cal: &Calendar) -> Result<String
     let rendered = out_dir.join("rendered.html");
     std::fs::write(&rendered, &html).map_err(|e| e.to_string())?;
 
-    let browser = find_browser().ok_or("未找到 Edge/Chrome 浏览器(已尝试 Windows/macOS 常见安装路径)")?;
-    let url = url::Url::from_file_path(abs_path(&rendered))
-        .map_err(|_| "rendered.html 路径转 URL 失败".to_string())?
-        .to_string();
     let png = out_dir.join("dashboard.png");
-    let (w, h) = dimensions(&cfg.orientation);
-    if !shoot(&browser, &png, &url, out_dir, w, h) {
-        return Err("截图失败".into());
+    let (w, h) = dimensions(&cfg.orientation, &cfg.device);
+
+    // 截图分流: macOS 优先系统 WKWebView sidecar(零安装、无需 Edge/Chrome),
+    // sidecar 缺失(未编译出来)或运行失败时回退浏览器路径; Windows 直接走浏览器。
+    #[cfg(target_os = "macos")]
+    let webview_done = match sidecar_path() {
+        Some(sidecar) => match shoot_webview(&sidecar, &rendered, &png, w, h) {
+            Ok(()) => true,
+            Err(e) => {
+                crate::log_line(base, &format!("WKWebView sidecar 失败, 回退浏览器: {e}"));
+                false
+            }
+        },
+        None => false,
+    };
+    #[cfg(not(target_os = "macos"))]
+    let webview_done = false;
+
+    if !webview_done {
+        let browser = find_browser()
+            .ok_or("未找到 Edge/Chrome 浏览器(已尝试 Windows/macOS 常见安装路径)")?;
+        let url = url::Url::from_file_path(abs_path(&rendered))
+            .map_err(|_| "rendered.html 路径转 URL 失败".to_string())?
+            .to_string();
+        if !shoot(&browser, &png, &url, out_dir, w, h) {
+            return Err("截图失败".into());
+        }
     }
-    // 尽量转灰度, 墨水屏显示更干净
+    let engine = if webview_done { "wkwebview" } else { "browser" };
+    // 尽量转灰度, 墨水屏显示更干净; 横版画面旋转 90° 后输出,
+    // 让竖板设备全屏显示横版内容, 方向随配置 cw(顺时针)/ccw(逆时针)
     match image::open(&png) {
         Ok(img) => {
-            if let Err(e) = img.to_luma8().save(&png) {
+            let oriented = if cfg.orientation == "landscape" {
+                let rgba = img.to_rgba8();
+                let rotated = if cfg.rotate == "ccw" {
+                    image::imageops::rotate270(&rgba)
+                } else {
+                    image::imageops::rotate90(&rgba)
+                };
+                image::DynamicImage::ImageRgba8(rotated)
+            } else {
+                img
+            };
+            if let Err(e) = oriented.to_luma8().save(&png) {
                 crate::log_line(base, &format!("灰度保存失败: {e}"));
             }
         }
         Err(e) => crate::log_line(base, &format!("灰度转换跳过(PNG 解码失败: {e})")),
     }
     let size = std::fs::metadata(&png).map(|m| m.len()).unwrap_or(0);
-    crate::log_line(base, &format!("rendered: dashboard.png {size} bytes"));
-    Ok(chrono::Local::now().format("%H:%M").to_string())
+    crate::log_line(base, &format!("rendered via {engine}: dashboard.png {size} bytes"));
+    // 秒级时间戳: 前端靠 last_render 变化判断渲染完成, 只到分钟会在同分钟内连续
+    // 两次渲染时误报"渲染超时"
+    Ok(chrono::Local::now().format("%H:%M:%S").to_string())
 }

@@ -23,6 +23,8 @@ pub struct Config {
     pub template: String,
     /// portrait | landscape
     pub orientation: String,
+    /// Kindle 型号(render::DEVICES 的 key), 决定渲染分辨率
+    pub device: String,
     pub interval_min: u64,
     pub port: u16,
     pub rss_sources: Vec<RssSource>,
@@ -35,8 +37,12 @@ pub struct Config {
     pub schedule_urls: Vec<String>,
     /// 热榜源: github / weibo / bilibili, 非空即启用
     pub hotlist_sources: Vec<String>,
-    /// Bing 每日壁纸(相框模式)
-    pub wallpaper: bool,
+    /// 相框夜画画面: moon=月相 | wallpaper=Bing 每日一图
+    pub frame_mode: String,
+    /// 横版输出旋转: cw=顺时针(默认) | ccw=逆时针, 竖板设备全屏显示横版画面
+    pub rotate: String,
+    /// 行情币种(CoinGecko id, 最多 5 个), 空则不显示行情
+    pub crypto: Vec<String>,
     /// KOReader SSH 推送配置
     pub kindle_host: Option<String>,
     pub kindle_user: String,
@@ -58,6 +64,7 @@ fn defaults() -> Config {
         city: "杭州".into(),
         template: "template.html".into(),
         orientation: "portrait".into(),
+        device: "pw4".into(),
         interval_min: 10,
         port: 8787,
         rss_sources: vec![],
@@ -67,7 +74,12 @@ fn defaults() -> Config {
         modules: serde_json::json!({}),
         schedule_urls: vec![],
         hotlist_sources: vec![],
-        wallpaper: false,
+        frame_mode: "wallpaper".into(),
+        rotate: "cw".into(),
+        crypto: vec![
+            "bitcoin".into(), "ethereum".into(), "binancecoin".into(),
+            "solana".into(), "ripple".into(),
+        ],
         kindle_host: None,
         kindle_user: "root".into(),
         kindle_ssh_port: 2222,
@@ -156,7 +168,7 @@ fn countdowns(v: &Value) -> Vec<Countdown> {
     out
 }
 
-fn from_value(v: &Value) -> Config {
+pub fn from_value(v: &Value) -> Config {
     let d = defaults();
     let port = num_field(v, "port", d.port as u64);
     Config {
@@ -166,6 +178,10 @@ fn from_value(v: &Value) -> Config {
             let o = str_field(v, "orientation", &d.orientation);
             if o == "landscape" { o } else { "portrait".into() }
         },
+        // device 缺失属旧配置常态, 静默回默认; 未识别的 key 由 render::device_size 兜底
+        device: v.get("device").and_then(|x| x.as_str())
+            .map(str::trim).filter(|s| !s.is_empty())
+            .unwrap_or("pw4").to_string(),
         interval_min: num_field(v, "interval_min", d.interval_min),
         port: if (1..=65535).contains(&port) { port as u16 } else {
             warn_once(format!("字段 port={port} 超出范围, 使用默认值"));
@@ -178,7 +194,22 @@ fn from_value(v: &Value) -> Config {
         modules: v.get("modules").cloned().unwrap_or_else(|| serde_json::json!({})),
         schedule_urls: str_vec(v, "schedule_urls"),
         hotlist_sources: str_vec(v, "hotlist_sources"),
-        wallpaper: v.get("wallpaper").and_then(|x| x.as_bool()).unwrap_or(false),
+        // frame_mode 缺失时按旧 wallpaper 开关推断, 老配置语义不变
+        frame_mode: match v.get("frame_mode").and_then(|x| x.as_str()) {
+            Some("moon") => "moon".into(),
+            Some(_) => "wallpaper".into(),
+            None if v.get("wallpaper").and_then(|x| x.as_bool()).unwrap_or(false) => "wallpaper".into(),
+            None => "moon".into(),
+        },
+        // rotate 缺失/写错静默回顺时针
+        rotate: match v.get("rotate").and_then(|x| x.as_str()) {
+            Some("ccw") => "ccw".into(),
+            _ => "cw".into(),
+        },
+        crypto: v.get("crypto").and_then(|x| x.as_array()).map(|a| {
+            a.iter().filter_map(|e| e.as_str().map(str::trim).filter(|s| !s.is_empty()).map(String::from))
+                .take(5).collect()
+        }).unwrap_or_else(|| defaults().crypto),
         kindle_host: v.get("kindle_host").and_then(|x| x.as_str())
             .map(str::trim).filter(|s| !s.is_empty()).map(String::from),
         kindle_user: str_field(v, "kindle_user", &d.kindle_user),

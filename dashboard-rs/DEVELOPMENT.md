@@ -77,16 +77,20 @@ Web 页 `/api/templates` 与渲染即按此识别。两点注意：
 2. 模板是纯 HTML+JS，数据从注入的 `__DATA__` JSON 读，不经过任何服务端模板引擎；
    无元数据头的文件以文件名兜底且仅竖版。
 
-当前启用九套,按三个设计流派分组,全部支持横竖版(白名单见 `render.rs::ALLOWED_TEMPLATES`):
+当前启用六套「夜画展签」系列:白底纸感的「画框」为装饰位,其余五套为墨色底
+夜画(白名单见 `render.rs::ALLOWED_TEMPLATES`),全部支持横竖版与旋转输出:
 
-| 流派 | 模板 |
-|---|---|
-| 报纸/编辑(原有) | 信息日报 `template.html` · 晨报编辑部 `template_editorial.html` · 终端播报 `template_terminal.html` |
-| 状态优先 & 极简卡片 | 静默须知 `template_zen.html`(空白即正常,只列需要注意的事) · 极简卡片 `template_mono.html`(白底黑字直角,一页全展示) |
-| TRMNL 栅格 | 左右分栏 `template_split.html`(1 Left 1 Right) · 四象限 `template_quad.html`(Quadrant) |
-| 相框艺术 | 相框夜画 `template_frame.html`(黑底,Bing 壁纸全幅 + 展签) · 画廊铭牌 `template_plaque.html`(卡纸画框,时刻即展品) |
+| 模板 | 底色 | 内容 |
+|---|---|---|
+| 画框 `template_gallery.html` | 白 | Bing 壁纸/月相全幅 + 白纸展签(时钟/日期/天气) |
+| 相框夜画 `template_frame.html` | 黑 | 大月相 + 星空 + 地平线, 展签(时钟/天气/倒数日/一言) |
+| 夜钟 `template_night.html` | 黑 | 巨时钟 + 日期农历 + 天气一行 + 一言 |
+| 告示 `template_board.html` | 黑 | 待办大字编号陈列 + 倒数日大数字 |
+| 诗笺 `template_poem.html` | 黑 | 一言宋体竖排 + 成语侧注 + 月相 |
+| 星图 `template_sky.html` | 黑 | 行情(CoinGecko, 最多 5 币) + 天气 + 倒数日 + 一言成语 |
 
-`resources/` 里还留有历史模板文件,未列入白名单不会出现在 Web 页。
+行情币种在 `config.json` 的 `crypto` 字段配置(CoinGecko id,最多 5 个);
+成语来自内置 `idioms.json`(48 条精选,按日轮换,离线可用)。
 
 ## 农历表再生成
 
@@ -106,7 +110,9 @@ Web 页 `/api/templates` 与渲染即按此识别。两点注意：
 | `GET /api/status` | `lan_ip` / `port` / `last_render`（HH:MM 或 "--"）/ `template` / `orientation` |
 | `GET /api/config` | 当前 `config.json`，缺字段用内置默认值补齐 |
 | `POST /api/config` | 校验（city 非空、port 1–65535、interval≥1、orientation 枚举）→ 合并保存（保留未知字段）→ 自动触发刷新 |
-| `GET /api/templates` | `{templates: [{file, name, orientations}]}` |
+| `POST /api/preview` | 请求体 = 表单当前配置（同 `/api/config`，可另带 `todo_content` 字符串）；返回注入数据后的模板 HTML（不保存配置、不截图、不转灰度），供 Web 页 iframe 实时预览。数据走 60 秒缓存避免反复打外网；时钟/待办按请求值取当前 || `GET /api/templates` | `{templates: [{file, name, orientations}]}` |
+| `GET /api/devices` | `{devices: [{key, name, w, h}]}`，Kindle 型号 -> 竖版分辨率表 |
+| `GET /api/scan` | 局域网 Kindle 探测：读本机 ARP 表，按 MAC 厂商（内置 203 个 Amazon OUI 前缀）+ KOReader/USBNetwork 端口（2222/22，每台 2 个 TCP 包）综合判定，返回 `{devices: [{ip, mac, ports, guess}]}` |
 | `GET /api/todo` / `POST /api/todo` | 待办读 / 整份替换（UTF-8），保存即刷新 |
 | `GET /api/holidays` | 法定节日前 6 条 `{name, date, days}`，查内置农历表，无需联网 |
 | `POST /api/refresh` | 立刻刷新 |
@@ -115,7 +121,8 @@ Web 页 `/api/templates` 与渲染即按此识别。两点注意：
 
 静态文件只允许 `out/` 下 `png/html/json` 三类扩展名，路径含 `..` 直接 404
 （避免把 `out/edge_profile` 浏览器配置暴露到局域网）。监听用 `socket2` 手动建
-`SO_REUSEADDR`，避免重启被 TIME_WAIT 卡 30 秒~2 分钟。
+`SO_REUSEADDR`，避免重启被 TIME_WAIT 卡 30 秒~2 分钟。HTTP 为 4 线程小线程池：
+`/api/preview` 同步抓数据可达数秒，单线程会把状态轮询和 Kindle 拉图一起卡住。
 
 ## 测试
 

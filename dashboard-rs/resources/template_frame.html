@@ -22,6 +22,8 @@
     align-items: center; justify-content: center; gap: 26px; }
   .moonart svg { width: 300px; height: 300px; opacity: .92; }
   .moonart .line { width: 420px; height: 1px; background: #3c3c3c; }
+  .stars { position: absolute; top: 6%; left: 0; right: 0; height: 200px; }
+  .ql { font-size: 22px; color: #b8b8b2; margin-top: 14px; letter-spacing: 1px; }
 
   /* 展签:底部信息带 */
   .label { position: absolute; left: 0; right: 0; bottom: 0;
@@ -105,10 +107,20 @@ if (DATA.wallpaper) {
     "残月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ${f}/>`
   };
   const name = DATA.moon ? DATA.moon.name : "满月";
+  const stars = [[14,18],[30,42],[52,12],[75,58],[96,26],[118,70],[140,22],
+                 [58,80],[104,50],[22,66],[128,88],[82,42]]
+    .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${0.8 + (i % 3) * 0.55}" fill="#f2f2ef" opacity="${0.25 + (i % 4) * 0.16}"/>`).join("");
   document.getElementById("moonart").innerHTML =
+    '<svg class="stars" viewBox="0 0 150 100" preserveAspectRatio="xMidYMid meet">' + stars + '</svg>' +
     '<svg viewBox="0 0 24 24">' + (p[name] || p["满月"]) + '</svg><div class="line"></div>' +
     '<div style="font-size:20px;color:#9a9a95;letter-spacing:4px">' + name + " · 月面 " +
     (DATA.moon ? DATA.moon.illum : 100) + "%</div>";
+}
+
+const y = DATA.yiyan;
+if (y && y.text) {
+  document.getElementById("ql").textContent =
+    "「" + y.text + "」" + (y.who ? " —— " + y.who : "");
 }
 </script>
 </body>

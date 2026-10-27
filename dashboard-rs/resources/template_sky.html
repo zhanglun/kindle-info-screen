@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=星图 orientations=portrait,landscape -->
+<style>
+  /* 星图 —— 夜览仪表。行情 / 天气 / 倒数日, 星点作幕,
+     信息以展签式分列, 夜里一眼看全。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #0b0b0b; color: #f2f2ef;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .page { width: 100%; height: 100%; padding: 90px 96px 76px;
+    display: flex; flex-direction: column; position: relative; }
+  .stars { position: absolute; top: 4%; right: 6%; width: 300px; height: 120px; }
+
+  .head { display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 16px; }
+  .head .upd { font-size: 25px; font-weight: 700; }
+  .head .dt { font-size: 20px; color: #8f8f8a; }
+  .rule { border-top: 1px solid #3a3a3a; }
+
+  .lab { display: flex; justify-content: space-between; font-size: 14px;
+    color: #8f8f8a; letter-spacing: 8px; margin: 30px 0 14px; }
+
+  .crypto { display: flex; justify-content: space-between; }
+  .crypto .cc { display: flex; flex-direction: column; gap: 4px; }
+  .crypto .sym { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .crypto .pv { font-size: 29px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .crypto .cv { font-size: 18px; font-family: "SF Mono", Menlo, monospace; color: #b8b8b2; }
+
+  .duo { display: flex; gap: 44px; }
+  .duo .wx { flex: 1.2; }
+  .duo .wx .big { display: flex; align-items: baseline; gap: 16px; }
+  .duo .wx .temp { font-size: 84px; font-weight: 200; line-height: 1;
+    font-variant-numeric: tabular-nums; }
+  .duo .wx .temp i { font-style: normal; font-size: 38px; }
+  .duo .wx .cond { font-size: 25px; font-weight: 700; }
+  .duo .wx .meta { font-size: 18px; color: #8f8f8a; margin-top: 12px; line-height: 1.8; }
+  .duo .cds { flex: 1; }
+  .duo .cds .row { display: flex; justify-content: space-between; align-items: baseline;
+    padding: 9px 0; border-bottom: 1px solid #1e1e1e; font-size: 21px; }
+  .duo .cds .row b { font-size: 27px; font-variant-numeric: tabular-nums; }
+
+  .idiom-band { margin-top: auto; padding-top: 22px; border-top: 1px solid #2a2a2a;
+    font-size: 21px; color: #b8b8b2; }
+  .idiom-band b { color: #f2f2ef; }
+
+  /* 横版: 三列 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .page { padding: 72px 92px 64px; }
+    .duo { gap: 48px; }
+    .duo .wx .temp { font-size: 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <svg class="stars" viewBox="0 0 100 40" preserveAspectRatio="none">
+    <circle cx="6" cy="20" r="0.4" fill="#f2f2ef" opacity="0.4"/>
+    <circle cx="18" cy="55" r="0.6" fill="#f2f2ef" opacity="0.3"/>
+    <circle cx="30" cy="15" r="0.35" fill="#f2f2ef" opacity="0.5"/>
+    <circle cx="43" cy="70" r="0.5" fill="#f2f2ef" opacity="0.35"/>
+    <circle cx="55" cy="30" r="0.4" fill="#f2f2ef" opacity="0.45"/>
+    <circle cx="68" cy="10" r="0.55" fill="#f2f2ef" opacity="0.3"/>
+    <circle cx="80" cy="50" r="0.35" fill="#f2f2ef" opacity="0.5"/>
+    <circle cx="93" cy="25" r="0.6" fill="#f2f2ef" opacity="0.4"/>
+  </svg>
+  <div class="head">
+    <span class="upd" id="upd">——</span>
+    <span class="dt" id="dt"></span>
+  </div>
+  <div class="rule"></div>
+
+  <div class="lab"><span>行 情</span><span>USD · 24H</span></div>
+  <div class="crypto" id="crypto"></div>
+
+  <div class="lab"><span>天气与倒数日</span></div>
+  <div class="duo">
+    <div class="wx" id="wx"></div>
+    <div class="cds" id="cds"></div>
+  </div>
+
+  <div class="idiom-band" id="idiomband"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+function fmtPrice(v){ if (v == null) return "—"; return v >= 1000 ? v.toLocaleString("en-US") : v; }
+function fmtChg(v){ if (v == null) return ""; return (v >= 0 ? "▲ +" : "▼ ") + v.toFixed(1) + "%"; }
+
+document.getElementById("upd").textContent = "更新于 " + DATA.time;
+document.getElementById("dt").textContent =
+  [DATA.date, DATA.weekday, DATA.lunar ? "农历 " + DATA.lunar : "",
+   DATA.jieqi || ""].filter(Boolean).join(" · ");
+
+const cr = DATA.crypto || [];
+document.getElementById("crypto").innerHTML = cr.length
+  ? cr.map(c => '<div class="cc"><span class="sym">' + c.sym + '</span>' +
+      '<span class="pv">' + fmtPrice(c.price) + '</span>' +
+      '<span class="cv">' + fmtChg(c.chg) + '</span></div>').join("")
+  : '<span style="font-size:19px;color:#6f6f6f">行情未配置或暂不可用</span>';
+
+const w = DATA.weather;
+if (w) {
+  const hi = w.days && w.days[0] ? w.days[0].hi : "";
+  const lo = w.days && w.days[0] ? w.days[0].lo : "";
+  document.getElementById("wx").innerHTML =
+    '<div class="big"><span class="temp">' + w.temp + '<i>°</i></span>' +
+    '<span class="cond">' + w.code + '<br><small style="font-size:18px;font-weight:400;color:#8f8f8a">' +
+    w.city + '</small></span></div>' +
+    '<div class="meta">' + (hi !== "" ? "今日 " + hi + "° / " + lo + "° · " : "") +
+    "风速 " + w.wind + " km/h<br>日出 " + w.sunrise + " · 日落 " + w.sunset + '</div>';
+} else {
+  document.getElementById("wx").innerHTML =
+    '<div class="cond">' + (DATA.weather_error || "暂无天气数据") + '</div>';
+}
+
+const cds = (DATA.countdowns || []).slice(0, 4);
+document.getElementById("cds").innerHTML = cds.length
+  ? cds.map(c => '<div class="row"><span>距' + c.name + '</span><b>' + c.days + ' 天</b></div>').join("")
+  : '<div class="row"><span>暂无倒数日</span></div>';
+
+const y = DATA.yiyan;
+const id = DATA.idiom;
+const parts = [];
+if (y && y.text) parts.push("「" + y.text + "」" + (y.who ? " —— " + y.who : ""));
+if (id && id.w) parts.push("<b>" + id.w + "</b>(" + (id.p || "") + ")" + (id.m ? " · " + id.m : ""));
+document.getElementById("idiomband").innerHTML = parts.join('<br>') || "——";
+</script>
+</body>
+</html>
