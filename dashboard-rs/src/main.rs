@@ -1,5 +1,6 @@
 //! Kindle 信息屏桌面版: 托盘常驻 + 后台定时渲染 + HTTP 供 Kindle 拉图。
 //! 启动即开始服务; 托盘菜单: 打开 Web 页 / 立刻刷新 / 退出。
+//! 子命令: `serve` 无托盘纯服务(Ctrl+C 退出), `once` 只渲染一次, 用于脚本/终端场景。
 // release 构建在 Windows 上不弹控制台黑窗(调试构建保留)
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod config;
@@ -22,6 +23,12 @@ const EMBEDDED_RESOURCES: &[(&str, &str)] = &[
     ("template.html", include_str!("../resources/template.html")),
     ("template_editorial.html", include_str!("../resources/template_editorial.html")),
     ("template_terminal.html", include_str!("../resources/template_terminal.html")),
+    ("template_zen.html", include_str!("../resources/template_zen.html")),
+    ("template_mono.html", include_str!("../resources/template_mono.html")),
+    ("template_split.html", include_str!("../resources/template_split.html")),
+    ("template_quad.html", include_str!("../resources/template_quad.html")),
+    ("template_frame.html", include_str!("../resources/template_frame.html")),
+    ("template_plaque.html", include_str!("../resources/template_plaque.html")),
     ("template_broadsheet.html", include_str!("../resources/template_broadsheet.html")),
     ("template_minimal.html", include_str!("../resources/template_minimal.html")),
     ("template_timetable.html", include_str!("../resources/template_timetable.html")),
@@ -33,7 +40,7 @@ const EMBEDDED_RESOURCES: &[(&str, &str)] = &[
 
 /// 内置资源版本: 升级时刷新"程序文件"(模板/农历表/webui); config.json 与 todo.txt
 /// 是用户数据, 仅在缺失时创建, 永不覆盖。改过内置模板的话升级后需要重新套用。
-const RESOURCE_VERSION: &str = "8";
+const RESOURCE_VERSION: &str = "10";
 
 /// 数据目录: 环境变量 > .app 内嵌运行(macOS) > 可执行文件旁的 resources/
 fn base_dir() -> PathBuf {
@@ -133,9 +140,60 @@ fn fatal_notify(msg: &str) {
     }
 }
 
+/// release 构建是 windows_subsystem="windows"(无控制台): 从终端直接启动 serve/once 时
+/// 标准句柄无效, 主动附着父控制台日志才可见; 若已被重定向(cargo run / > 文件)则句柄
+/// 有效, 保持原样以便捕获。附着失败(双击启动等无控制台场景)即静默。
+#[cfg(windows)]
+fn attach_parent_console() {
+    use windows_sys::Win32::Foundation::{GENERIC_READ, GENERIC_WRITE, INVALID_HANDLE_VALUE};
+    use windows_sys::Win32::Storage::FileSystem::{
+        CreateFileW, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING,
+    };
+    use windows_sys::Win32::System::Console::{
+        AttachConsole, GetStdHandle, SetStdHandle, ATTACH_PARENT_PROCESS, STD_ERROR_HANDLE,
+        STD_OUTPUT_HANDLE,
+    };
+    unsafe {
+        let cur = GetStdHandle(STD_ERROR_HANDLE);
+        if !cur.is_null() && cur != INVALID_HANDLE_VALUE {
+            return;
+        }
+        if AttachConsole(ATTACH_PARENT_PROCESS) == 0 {
+            return;
+        }
+        let mut path: Vec<u16> = "CONOUT$".encode_utf16().collect();
+        path.push(0);
+        let conout = CreateFileW(
+            path.as_ptr(),
+            GENERIC_READ | GENERIC_WRITE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            std::ptr::null(),
+            OPEN_EXISTING,
+            0,
+            std::ptr::null_mut(),
+        );
+        if conout != INVALID_HANDLE_VALUE {
+            SetStdHandle(STD_OUTPUT_HANDLE, conout);
+            SetStdHandle(STD_ERROR_HANDLE, conout);
+        }
+    }
+}
+
+#[cfg(not(windows))]
+fn attach_parent_console() {}
+
 fn main() {
     if std::env::var_os("KINDLE_DASHBOARD_RESTART").is_some() {
         std::thread::sleep(Duration::from_secs(1));
+    }
+    // 子命令: serve=无托盘纯服务(对齐原 Python 版 serve), once=只渲染一次; 无参数=托盘常驻
+    let mode = std::env::args().nth(1).unwrap_or_default();
+    if !mode.is_empty() && mode != "serve" && mode != "once" {
+        eprintln!("未知参数: {mode} (可用: serve / once; 无参数 = 托盘常驻)");
+        std::process::exit(2);
+    }
+    if !mode.is_empty() {
+        attach_parent_console();
     }
     let base = base_dir();
     const USER_FILES: &[&str] = &["config.json", "todo.txt"];
@@ -166,6 +224,18 @@ fn main() {
         lunar::Calendar::empty()
     });
 
+    // once 模式: 渲染一次即退出, 改模板/配置后验证效果(对齐原 Python 版 dashboard.py once)
+    if mode == "once" {
+        match render::render_once(&base, &out_dir, &cal) {
+            Ok(t) => log_line(&base, &format!("渲染完成 ({t}): {}", out_dir.join("dashboard.png").display())),
+            Err(e) => {
+                log_line(&base, &format!("render error: {e}"));
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
     // 渲染线程的唤醒通道(立刻刷新): 服务线程经 Shared 转发
     let (tx, rx) = mpsc::channel::<()>();
     let tx_tray = tx.clone(); // 托盘"立刻刷新"菜单也要发信号
@@ -179,12 +249,19 @@ fn main() {
     // HTTP 服务线程(Kindle 拉图 + Web 配置管理)
     if let Err(e) = server::start(out_dir.clone(), base.clone(), shared.clone()) {
         log_line(&base, &e);
-        fatal_notify(&e); // 常见原因: Python 版还占着 8787
+        if mode.is_empty() {
+            fatal_notify(&e); // 常见原因: 另一个实例还占着 8787
+        } else {
+            std::process::exit(1);
+        }
         return;
     }
     log_line(&base, &format!("服务已启动: http://0.0.0.0:{}/dashboard.png  每 {} 分钟刷新",
                              cfg.port, cfg.interval_min));
     log_line(&base, &format!("Kindle 拉取地址: http://{}:{}/dashboard.png", shared.lan_ip, cfg.port));
+    if mode == "serve" {
+        log_line(&base, &format!("配置管理页面:   http://127.0.0.1:{}/  (serve 模式: Ctrl+C 退出)", cfg.port));
+    }
 
     // 渲染线程: 立即渲染一次, 之后按间隔; 收到信号提前唤醒(立刻刷新)
     let worker_base = base.clone();
@@ -212,6 +289,11 @@ fn main() {
         }
     });
 
+    // serve 模式: 不进托盘事件循环, 主线程挂起等 Ctrl+C 结束
+    if mode == "serve" {
+        std::thread::park();
+        return;
+    }
     run_tray(cfg.port, tx_tray);
 }
 

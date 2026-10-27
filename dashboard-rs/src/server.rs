@@ -1,5 +1,5 @@
 //! HTTP 服务: 供 Kindle 拉取 dashboard.png + Web 配置管理页与 API。
-//! API 契约与 Python 版(dashboard.py)保持一致, webui.html 两端共用同一份文件。
+//! API 契约沿用原 Python 版(dashboard.py,已删除), 契约稳定便于脚本调用。
 use socket2::{Domain, Protocol, Socket, Type};
 use std::io::Read;
 use std::net::{SocketAddr, TcpListener, UdpSocket};

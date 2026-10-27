@@ -36,14 +36,25 @@ pub struct TemplateInfo {
     pub orientations: Vec<String>,
 }
 
+/// 实际启用的模板白名单(list_templates 与 render_once 以此为准);新模板两处都要记得加
+pub const ALLOWED_TEMPLATES: &[&str] = &[
+    // 信息日报 / 晨报编辑部 / 终端播报
+    "template.html", "template_editorial.html", "template_terminal.html",
+    // 静默须知 / 极简卡片(状态优先 & 极简卡片流派)
+    "template_zen.html", "template_mono.html",
+    // 左右分栏 / 四象限(TRMNL 栅格流派)
+    "template_split.html", "template_quad.html",
+    // 相框夜画 / 画廊铭牌(相框艺术流派)
+    "template_frame.html", "template_plaque.html",
+];
+
 /// 扫描数据目录下的 template*.html, 解析头部元数据; 无元数据的文件以文件名兜底, 仅竖版
 pub fn list_templates(base: &Path) -> Vec<TemplateInfo> {
-    const ALLOWED: &[&str] = &["template.html", "template_editorial.html", "template_terminal.html"];
     let mut out = Vec::new();
     let Ok(entries) = std::fs::read_dir(base) else { return out };
     let mut files: Vec<_> = entries.flatten()
         .map(|e| e.file_name().to_string_lossy().into_owned())
-        .filter(|n| ALLOWED.contains(&n.as_str()))
+        .filter(|n| ALLOWED_TEMPLATES.contains(&n.as_str()))
         .collect();
     files.sort();
     for file in files {
@@ -70,8 +81,19 @@ pub fn list_templates(base: &Path) -> Vec<TemplateInfo> {
     out
 }
 
+fn abs_path(p: &Path) -> PathBuf {
+    // Edge 的 --screenshot/--user-data-dir 与 url 转换都依赖绝对路径
+    if p.is_absolute() {
+        p.to_path_buf()
+    } else {
+        std::env::current_dir().map(|cwd| cwd.join(p)).unwrap_or_else(|_| p.to_path_buf())
+    }
+}
+
 fn shoot(browser: &Path, png: &Path, url: &str, out_dir: &Path, w: u32, h: u32) -> bool {
-    let profile = out_dir.join("edge_profile");
+    let png_abs = abs_path(png);
+    let png: &Path = &png_abs; // 后续均按引用使用
+    let profile = abs_path(&out_dir.join("edge_profile"));
     let _ = std::fs::create_dir_all(&profile);
     for headless in ["--headless=new", "--headless"] {
         let _ = std::fs::remove_file(png);
@@ -116,8 +138,11 @@ fn shoot(browser: &Path, png: &Path, url: &str, out_dir: &Path, w: u32, h: u32) 
 pub fn render_once(base: &Path, out_dir: &Path, cal: &Calendar) -> Result<String, String> {
     let cfg = config::load(base);
     let data = crate::data::build_data(base, &cfg, cal);
-    const ALLOWED: &[&str] = &["template.html", "template_editorial.html", "template_terminal.html"];
-    let template = if ALLOWED.contains(&cfg.template.as_str()) { &cfg.template } else { "template.html" };
+    let template = if ALLOWED_TEMPLATES.contains(&cfg.template.as_str()) {
+        &cfg.template
+    } else {
+        "template.html"
+    };
     let tpl_path = base.join(template);
     let tpl = std::fs::read_to_string(&tpl_path)
         .map_err(|e| format!("模板读取失败 {}: {e}", tpl_path.display()))?;
@@ -128,7 +153,7 @@ pub fn render_once(base: &Path, out_dir: &Path, cal: &Calendar) -> Result<String
     std::fs::write(&rendered, &html).map_err(|e| e.to_string())?;
 
     let browser = find_browser().ok_or("未找到 Edge/Chrome 浏览器(已尝试 Windows/macOS 常见安装路径)")?;
-    let url = url::Url::from_file_path(&rendered)
+    let url = url::Url::from_file_path(abs_path(&rendered))
         .map_err(|_| "rendered.html 路径转 URL 失败".to_string())?
         .to_string();
     let png = out_dir.join("dashboard.png");

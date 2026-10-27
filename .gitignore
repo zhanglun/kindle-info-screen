@@ -1,9 +1,3 @@
-# Edge 无头浏览器临时配置(运行时生成)
-dashboard/out/edge_profile/
-
-# 渲染中间产物(每次刷新重新生成)
-dashboard/out/rendered.html
-
 # 参考用的第三方仓库克隆(自带 .git,不入库)
 jailbreak-tools/kindle-screensavers/
 
@@ -11,10 +5,10 @@ jailbreak-tools/kindle-screensavers/
 *.log
 __pycache__/
 
-# Python 虚拟环境
+# Python 虚拟环境(gen_tables.py 预生成农历表用)
 .venv/
 
-# Rust 构建产物与打包出的 .app
+# Rust 构建产物与打包出的 .app(运行时数据目录 out/ 也在 target/ 内)
 dashboard-rs/target/
 dashboard-rs/*.app
 
@@ -23,4 +17,4 @@ dashboard-rs/dist-windows/
 dashboard-rs/*.zip
 
 # 本机/设备私钥，禁止提交
-/dashboard/kindle-fixes/dropbear_ed25519_host_key
+/kindle-fixes/dropbear_ed25519_host_key

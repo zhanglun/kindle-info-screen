@@ -48,6 +48,6 @@ ssh -p 2222 -i ~/.ssh/kindle_id_rsa \\
   root@<kindle-ip> 'echo SSH_OK; id'
 ```
 
-确认手动连接成功后，`dashboard/config.json` 中的 `kindle_host` 改为弹窗 IP，
+确认手动连接成功后，数据目录 `config.json` 中的 `kindle_host` 改为弹窗 IP，
 保留 `kindle_ssh_port: 2222`，最后再将 `push_after_render` 改为 `true` 并重启服务。
 Kindle 睡眠时 SSH 不可达，程序会按 `push_retry_min` 重试。

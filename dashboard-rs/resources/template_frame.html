@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=相框夜画 orientations=portrait,landscape -->
+<style>
+  /* 相框夜画 —— 黑底白字,让信息牌消失在一幅画里。
+     Bing 每日一图(灰度抖动)做全幅画面,信息退到底部展签;
+     没开壁纸时,月相就是今天的画。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #0b0b0b; color: #f2f2ef;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .veil { position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(5,5,5,.94) 0%, rgba(5,5,5,.72) 22%, rgba(5,5,5,.18) 44%, rgba(5,5,5,0) 58%); }
+
+  /* 无壁纸时的代偿画面:大月相 + 地平线 */
+  .moonart { position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 26px; }
+  .moonart svg { width: 300px; height: 300px; opacity: .92; }
+  .moonart .line { width: 420px; height: 1px; background: #3c3c3c; }
+
+  /* 展签:底部信息带 */
+  .label { position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 34px 56px 44px; display: flex; justify-content: space-between;
+    align-items: flex-end; gap: 40px; }
+  .label .time { font-size: 118px; line-height: .95; letter-spacing: 2px; }
+  .label .time small { display: block; font-size: 24px; letter-spacing: 3px;
+    color: #c9c9c4; margin-top: 16px; font-weight: 400; }
+  .label .meta { text-align: right; font-size: 22px; line-height: 1.85; color: #dededa; }
+  .label .meta .wx { font-size: 30px; font-weight: 700; color: #ffffff; }
+  .label .credit { position: absolute; right: 56px; top: -34px; font-size: 16px;
+    color: #8f8f8a; letter-spacing: 1px; }
+
+  /* 横版(1448x1072):展签一行排开,时刻字降号 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .label { padding: 30px 72px 40px; align-items: baseline; }
+    .label .time { font-size: 96px; }
+    .label .time small { display: inline; margin-left: 18px; }
+    .label .meta { font-size: 20px; }
+    .moonart svg { width: 240px; height: 240px; }
+  }
+</style>
+</head>
+<body>
+<img class="art" id="art" alt="" style="display:none">
+<div class="veil" id="veil" style="display:none"></div>
+<div class="moonart" id="moonart"></div>
+
+<div class="label">
+  <div class="time mono"><span id="clock">--:--</span>
+    <small id="dateline"></small>
+  </div>
+  <div class="meta">
+    <div class="wx" id="wx">——</div>
+    <div id="wxsub"></div>
+    <div id="cd"></div>
+  </div>
+  <span class="credit" id="credit"></span>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+document.getElementById("clock").textContent = DATA.time;
+const dl = [DATA.date + " " + DATA.weekday];
+if (DATA.lunar) dl.push("农历" + DATA.lunar);
+if (DATA.jieqi) dl.push(DATA.jieqi);
+document.getElementById("dateline").textContent = dl.join(" · ");
+
+const w = DATA.weather;
+if (w) {
+  document.getElementById("wx").textContent = w.code + " " + w.temp + "°C";
+  const sub = [w.hi != null ? w.days[0].hi + "° / " + w.days[0].lo + "°" : "",
+               "风 " + w.wind + " km/h"];
+  if (w.aqi != null) sub.push(w.aqi_desc);
+  document.getElementById("wxsub").textContent = sub.filter(Boolean).join(" · ");
+} else {
+  document.getElementById("wx").textContent = DATA.weather_error || "暂无天气";
+}
+const cd = (DATA.countdowns || []).slice(0, 2)
+  .map(c => "距" + c.name + " " + c.days + " 天").join(" · ");
+document.getElementById("cd").textContent = cd || "";
+
+/* 画面:壁纸优先,否则月相 */
+if (DATA.wallpaper) {
+  const art = document.getElementById("art");
+  art.src = DATA.wallpaper.file;
+  art.style.display = "block";
+  document.getElementById("veil").style.display = "block";
+  document.getElementById("moonart").style.display = "none";
+  document.getElementById("credit").textContent = "图 · " + (DATA.wallpaper.credit || "Bing") + " 一日一图";
+} else {
+  const o = 'fill="none" stroke="#e8e8e4" stroke-width="1.1"', f = 'fill="#e8e8e4"';
+  const p = {
+    "新月": `<circle cx="12" cy="12" r="9" ${o}/>`,
+    "娥眉月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A4,9 0 0 0 12,3 Z" ${f}/>`,
+    "上弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 Z" ${f}/>`,
+    "盈凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 1 12,21 A5.5,9 0 0 1 12,3 Z" ${f}/>`,
+    "满月": `<circle cx="12" cy="12" r="9" ${o}/><circle cx="12" cy="12" r="9" ${f}/>`,
+    "亏凸月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A5.5,9 0 0 0 12,3 Z" ${f}/>`,
+    "下弦月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 Z" ${f}/>`,
+    "残月": `<circle cx="12" cy="12" r="9" ${o}/><path d="M12,3 A9,9 0 0 0 12,21 A4,9 0 0 1 12,3 Z" ${f}/>`
+  };
+  const name = DATA.moon ? DATA.moon.name : "满月";
+  document.getElementById("moonart").innerHTML =
+    '<svg viewBox="0 0 24 24">' + (p[name] || p["满月"]) + '</svg><div class="line"></div>' +
+    '<div style="font-size:20px;color:#9a9a95;letter-spacing:4px">' + name + " · 月面 " +
+    (DATA.moon ? DATA.moon.illum : 100) + "%</div>";
+}
+</script>
+</body>
+</html>

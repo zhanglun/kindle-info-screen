@@ -245,6 +245,14 @@
 const $ = id => document.getElementById(id);
 let CFG = null, TPLS = [];
 let depCount = 0, rendering = false;
+let pendingApply = false, applyTimer = null;
+
+/* 翻牌即出发: 点选版面/朝向后自动保存并渲染, 预览随之更新。
+   渲染进行中再点不并发, 记一笔待应用, 本轮结束后自动补一轮(后点的生效)。 */
+function scheduleApply(delay = 600) {
+  clearTimeout(applyTimer);
+  applyTimer = setTimeout(() => doSave(true), delay);
+}
 
 function toast(msg, err) {
   const t = $("toast");
@@ -270,8 +278,8 @@ function setStatus(text, cls, animate) {
 }
 
 function renderBoard() {
-  const active = ["template.html", "template_editorial.html", "template_terminal.html"].includes(CFG.template)
-    ? CFG.template : "template.html";
+  const known = TPLS.map(t => t.file);
+  const active = known.includes(CFG.template) ? CFG.template : "template.html";
   CFG.template = active;
   const DEFAULT_ON = {weather:1, rss:1, yiyan:1, lunar:1, countdowns:1};
   const NAMES = {weather:"天气", rss:"RSS", yiyan:"一言", lunar:"农历", countdowns:"倒数日"};
@@ -293,6 +301,8 @@ function renderBoard() {
       if (!t.orientations.includes(selOrientation())) setOrientation(t.orientations[0]);
       renderBoard();
       renderOrientationGate();
+      toast(`已选「${t.name}」,正在上屏…`);
+      scheduleApply();
     };
     board.appendChild(row);
   }
@@ -370,10 +380,12 @@ async function load() {
   });
   bindToggle("wallTg", () => !!cfg.wallpaper, el => {
     cfg.wallpaper = el.classList.contains("on");
-    if (cfg.wallpaper && CFG.template !== "template_editorial.html" && CFG.template !== "template_terminal.html") {
-      CFG.template = "template_editorial.html";
+    // 壁纸要配支持背景图的版式:「相框夜画」首选,编辑部/终端播报次之
+    const wallpaperOk = ["template_frame.html", "template_editorial.html", "template_terminal.html"];
+    if (cfg.wallpaper && !wallpaperOk.includes(CFG.template)) {
+      CFG.template = "template_frame.html";
       renderBoard(); renderOrientationGate();
-      toast("Bing 壁纸已切换到支持背景图的版式");
+      toast("Bing 壁纸已搭配「相框夜画」版式");
     }
   });
   setOrientation(cfg.orientation || "portrait");
@@ -453,6 +465,7 @@ function collectConfig() {
   };
 }
 async function doSave(refresh) {
+  if (refresh && rendering) { pendingApply = true; return; }
   try {
     $("btnSave").disabled = $("btnSaveOnly").disabled = true;
     await api("/api/config", { method: "POST",
@@ -466,7 +479,10 @@ async function doSave(refresh) {
       toast("已保存");
     }
   } catch (e) { toast("保存失败: " + e.message, true); }
-  finally { $("btnSave").disabled = $("btnSaveOnly").disabled = false; }
+  finally {
+    $("btnSave").disabled = $("btnSaveOnly").disabled = false;
+    if (refresh && pendingApply && !rendering) { pendingApply = false; doSave(true); }
+  }
 }
 $("btnSave").onclick = () => doSave(true);
 $("btnSaveOnly").onclick = () => doSave(false);
@@ -488,6 +504,7 @@ document.querySelectorAll("#orient .tg").forEach(b =>
       return;
     }
     CFG.orientation = b.dataset.v; setOrientation(b.dataset.v);
+    scheduleApply();
   });
 $("btnAddRss").onclick = () => { CFG.rss_sources.push({name:"",url:""}); 
   listEditor($("rssList"), CFG.rss_sources, [{k:"name",ph:"名称",flex:"0 0 110px"},{k:"url",ph:"RSS 地址"}]); };

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-orientation="/*__ORIENTATION__*/portrait">
+<head>
+<meta charset="utf-8">
+<!-- kindle-template: name=四象限 orientations=portrait,landscape -->
+<style>
+  /* 四象限 —— TRMNL Mashup「Quadrant」。
+     一条十字把屏面分成四个 View,每格一个主题,抬头小字即格名。
+     结构即版面:先有十字,再有内容。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1072px; height: 1448px; background: #ffffff; color: #111111;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden; }
+  .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  .frame { width: 100%; height: 100%; padding: 26px; display: flex; flex-direction: column; }
+  .shell { flex: 1; min-height: 0; border: 3px solid #111; display: flex; flex-direction: column; }
+
+  .titlebar { display: flex; justify-content: space-between; align-items: center;
+    background: #111; color: #fff; padding: 10px 20px;
+    font-size: 19px; letter-spacing: 4px; }
+  .titlebar .mono { letter-spacing: 1px; font-size: 18px; }
+
+  /* 十字:2x2 */
+  .quad { flex: 1; min-height: 0; display: grid;
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .cell { min-width: 0; min-height: 0; padding: 18px 22px; display: flex; flex-direction: column;
+    overflow: hidden; }
+  .cell:nth-child(1) { border-right: 2px solid #111; border-bottom: 2px solid #111; }
+  .cell:nth-child(2) { border-bottom: 2px solid #111; }
+  .cell:nth-child(3) { border-right: 2px solid #111; }
+  .cellhead { font-size: 17px; letter-spacing: 5px; color: #888; margin-bottom: 10px; }
+
+  /* 1 现在 */
+  .clock { font-size: 92px; line-height: 1; letter-spacing: 1px; }
+  .dateline { font-size: 22px; color: #444; margin-top: 10px; line-height: 1.65; }
+
+  /* 2 天气 */
+  .wx .temp { font-size: 64px; font-weight: 300; line-height: 1; }
+  .wx .temp sup { font-size: 24px; }
+  .wx .cond { font-size: 24px; font-weight: 700; margin-top: 6px; }
+  .wx .sub { font-size: 17px; color: #555; margin-top: 6px; line-height: 1.6; }
+  .mini5 { display: flex; margin-top: auto; border-top: 1px solid #d8d8d8; padding-top: 8px; }
+  .mini5 .m { flex: 1; font-size: 16px; color: #555; }
+  .mini5 .m + .m { border-left: 1px solid #d8d8d8; padding-left: 8px; }
+  .mini5 .m b { display: block; color: #111; font-size: 18px; margin-top: 1px; }
+
+  /* 3 待办 */
+  .todo li { list-style: none; display: flex; gap: 13px; align-items: flex-start;
+    padding: 7px 0; font-size: 23px; line-height: 1.5; }
+  .todo .box { flex: none; width: 16px; height: 16px; border: 2px solid #111; margin-top: 9px; }
+  .todo .none { font-size: 19px; color: #888; }
+
+  /* 4 倒数日 + 一言 */
+  .cds .cd { display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 21px; padding: 6px 0; border-bottom: 1px solid #ececec; }
+  .cds .cd b { font-size: 30px; }
+  .cds .cd .r { color: #888; font-size: 16px; }
+  .cds .cd .r b { margin-right: 8px; }
+  .qline { margin-top: auto; font-size: 20px; line-height: 1.6; color: #333;
+    border-top: 1px solid #d8d8d8; padding-top: 10px; }
+  .qline .a { display: block; text-align: right; font-size: 16px; color: #888; margin-top: 2px; }
+
+  /* 横版(1448x1072):仍为 2x2,字号整体收敛 */
+  @media (min-width: 1200px) {
+    html, body { width: 1448px; height: 1072px; }
+    .frame { padding: 22px; }
+    .cell { padding: 14px 20px; }
+    .clock { font-size: 76px; }
+    .wx .temp { font-size: 52px; }
+    .todo li { font-size: 20px; padding: 5px 0; }
+    .qline { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="shell">
+    <div class="titlebar">
+      <span>四象限 · QUADRANT</span>
+      <span class="mono" id="stamp"></span>
+    </div>
+    <div class="quad">
+      <div class="cell">
+        <div class="cellhead">现 在</div>
+        <div class="clock mono" id="clock"></div>
+        <div class="dateline" id="dateline"></div>
+        <div style="margin-top:auto;font-size:18px;color:#888" id="moon"></div>
+      </div>
+      <div class="cell wx">
+        <div class="cellhead">天 气</div>
+        <div><span class="temp"><span id="temp">--</span><sup>°C</sup></span></div>
+        <div class="cond" id="cond">——</div>
+        <div class="sub" id="wxsub"></div>
+        <div class="mini5" id="mini5"></div>
+      </div>
+      <div class="cell">
+        <div class="cellhead">待 办 <span class="mono" id="todon" style="letter-spacing:0"></span></div>
+        <ul class="todo" id="todo"></ul>
+      </div>
+      <div class="cell">
+        <div class="cellhead">倒数日 · 一言</div>
+        <div class="cds" id="cds"></div>
+        <div class="qline"><span id="q"></span><span class="a" id="a"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+document.getElementById("stamp").textContent = "UPD " + DATA.time;
+document.getElementById("clock").textContent = DATA.time;
+const dl = [DATA.date + " " + DATA.weekday];
+if (DATA.lunar) dl.push("农历" + DATA.lunar);
+if (DATA.jieqi) dl.push(DATA.jieqi);
+document.getElementById("dateline").textContent = dl.join(" · ");
+document.getElementById("moon").textContent =
+  DATA.moon ? DATA.moon.name + " · 月面 " + DATA.moon.illum + "%" : "";
+
+const w = DATA.weather;
+if (w) {
+  document.getElementById("temp").textContent = w.temp;
+  document.getElementById("cond").textContent = w.code + " · " + w.city;
+  const sub = ["风 " + w.wind + " km/h", "日出 " + w.sunrise + " · 日落 " + w.sunset];
+  if (w.aqi != null) sub.push("空气 " + w.aqi_desc);
+  document.getElementById("wxsub").innerHTML = sub.join(" · ");
+  document.getElementById("mini5").innerHTML = w.days.map(d =>
+    '<div class="m">' + d.label + '<b>' + d.hi + '°/' + d.lo + '°</b>' + d.code + '</div>').join("");
+} else {
+  document.getElementById("cond").textContent = DATA.weather_error || "暂无天气数据";
+}
+
+const todo = DATA.todo || [];
+document.getElementById("todon").textContent = todo.length ? todo.length + " 项" : "";
+document.getElementById("todo").innerHTML = todo.length
+  ? todo.map(t => '<li><span class="box"></span><span>' + t + '</span></li>').join("")
+  : '<div class="none">今日无待办</div>';
+
+const cds = DATA.countdowns || [];
+document.getElementById("cds").innerHTML = cds.length
+  ? cds.slice(0, 4).map(c =>
+      '<div class="cd">距' + c.name + '<span class="r"><b>' + c.days + ' 天</b>' + c.date + '</span></div>').join("")
+  : '<div style="font-size:19px;color:#888;padding:4px 0">暂无倒数日</div>';
+
+const y = DATA.yiyan;
+if (y && y.text) {
+  document.getElementById("q").textContent = "「" + y.text + "」";
+  document.getElementById("a").textContent =
+    "—— " + (y.who ? y.who + (y.from ? " 《" + y.from + "》" : "") : y.from || "");
+} else {
+  document.getElementById("q").textContent = "今天没有摘到一言。";
+}
+</script>
+</body>
+</html>
