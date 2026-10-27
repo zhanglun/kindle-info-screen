@@ -10,6 +10,12 @@ APP="Kindle Dashboard.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 cp target/release/kindle-dashboard "$APP/Contents/MacOS/"
+# WKWebView 截图 sidecar(build.rs 编译, 缺失时主程序自动回退 Edge/Chrome)
+if [ -f target/release/webview_shot ]; then
+  cp target/release/webview_shot "$APP/Contents/MacOS/"
+else
+  echo "警告: 未找到 target/release/webview_shot, 本包将回退 Edge/Chrome 截图" >&2
+fi
 
 cat > "$APP/Contents/Info.plist" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
